@@ -1,0 +1,171 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String  @id @default(uuid())
+  name       String
+  firstName  String?
+  email      String  @unique
+  keycloakId String? @unique
+
+  // propriétaire d’un établissement
+  etablissementId String?        @unique
+  etablissement   Etablissement? @relation(fields: [etablissementId], references: [id])
+
+  // réservations
+  carBookings  BookingCar[]
+  roomBookings BookingRoom[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([keycloakId, email, etablissementId])
+}
+
+model Etablissement {
+  id          String            @id @default(uuid())
+  name        String
+  type        EtablissementType // HOTEL, CARS, etc.
+  description String?
+  address     String
+  city        String
+  country     String
+  phone       String?
+
+  owner        User? // propriétaire
+  hotel        Hotel?
+  agence       CarAgency?
+  subscription Subscription?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Hotel {
+  id              String        @id @default(uuid())
+  etablissementId String        @unique
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id])
+  rooms           Room[]
+}
+
+model Room {
+  id        String        @id @default(uuid())
+  hotelId   String
+  name      String
+  capacity  Int
+  price     Float
+  available Boolean       @default(true)
+  hotel     Hotel         @relation(fields: [hotelId], references: [id])
+  bookings  BookingRoom[]
+}
+
+model BookingRoom {
+  id        String        @id @default(uuid())
+  userId    String
+  roomId    String
+  startDate DateTime
+  endDate   DateTime
+  status    BookingStatus @default(PENDING)
+  user      User          @relation(fields: [userId], references: [id])
+  room      Room          @relation(fields: [roomId], references: [id])
+}
+
+model CarAgency {
+  id              String        @id @default(uuid())
+  etablissementId String        @unique
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id])
+  cars            Car[]
+}
+
+model Car {
+  id          String       @id @default(uuid())
+  agenceId    String
+  name        String
+  brand       String
+  model       String
+  plateNumber String       @unique
+  dailyPrice  Float
+  available   Boolean      @default(true)
+  agence      CarAgency    @relation(fields: [agenceId], references: [id])
+  bookings    BookingCar[]
+}
+
+model BookingCar {
+  id        String        @id @default(uuid())
+  userId    String
+  carId     String
+  startDate DateTime
+  endDate   DateTime
+  status    BookingStatus @default(PENDING)
+  user      User          @relation(fields: [userId], references: [id])
+  car       Car           @relation(fields: [carId], references: [id])
+}
+
+model SubscriptionPlan {
+  id       String @id @default(uuid())
+  name     Plan // Nom du plan : "Basic", "Premium", etc.
+  price    Float
+  duration Int // Durée en jours
+
+  // Limitations personnalisées (ajuste selon les besoins)
+  maxListings             Int?
+  maxImagesPerListing     Int?
+  maxReservationsPerMonth Int?
+  canUseDiscounts         Boolean @default(false)
+  canAccessAnalytics      Boolean @default(false)
+  prioritySupport         Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id              String             @id @default(uuid())
+  etablissementId String             @unique
+  planId          String
+  startDate       DateTime           @default(now())
+  endDate         DateTime
+  canceledAt      DateTime?
+  status          SubscriptionStatus @default(PENDING)
+  etablissement   Etablissement      @relation(fields: [etablissementId], references: [id])
+  plan            SubscriptionPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PENDING
+  CANCELED
+  EXPIRED
+}
+
+enum EtablissementType {
+  HOTEL
+  AGENCE
+}
+
+enum BookingStatus {
+  ACTIVE
+  PENDING
+  CANCELED
+  EXPIRED
+}
+
+enum Plan {
+  BASIC
+  STANDARD
+  PRO
+}
