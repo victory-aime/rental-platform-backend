@@ -8,7 +8,7 @@ async function bootstrap() {
   app.enableCors({
     origin: ['http://localhost:8070'], // List of allowed origins
     credentials: true, // ✅ Permet l'envoi et la réception des cookies
-    allowedHeaders: ['Content-Type', 'Authorization','x-device'], // ✅ Autorise ces en-têtes
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-device'], // ✅ Autorise ces en-têtes
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // ✅ Autorise ces méthodes
   });
   await app.listen(4000, async () => {

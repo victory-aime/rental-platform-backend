@@ -5,11 +5,7 @@ import { PrismaService } from 'src/config/services';
 import { KeycloakService } from 'src/modules/keycloak/keycloak.service';
 
 @Module({
-  providers: [
-    UsersService,
-    PrismaService,
-    KeycloakService,
-  ],
+  providers: [UsersService, PrismaService, KeycloakService],
   controllers: [UsersController],
   exports: [UsersService],
 })

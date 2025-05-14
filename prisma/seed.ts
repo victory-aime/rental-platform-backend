@@ -1,19 +1,24 @@
-import { PrismaClient, EtablissementType, Plan, SubscriptionStatus } from '@prisma/client'
+import {
+  PrismaClient,
+  EtablissementType,
+  Plan,
+  SubscriptionStatus,
+} from '@prisma/client';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
   // Nettoyage
-  await prisma.bookingCar.deleteMany()
-  await prisma.bookingRoom.deleteMany()
-  await prisma.car.deleteMany()
-  await prisma.room.deleteMany()
-  await prisma.hotel.deleteMany()
-  await prisma.carAgency.deleteMany()
-  await prisma.subscription.deleteMany()
-  await prisma.subscriptionPlan.deleteMany()
-  await prisma.etablissement.deleteMany()
-  await prisma.user.deleteMany()
+  await prisma.bookingCar.deleteMany();
+  await prisma.bookingRoom.deleteMany();
+  await prisma.car.deleteMany();
+  await prisma.room.deleteMany();
+  await prisma.hotel.deleteMany();
+  await prisma.carAgency.deleteMany();
+  await prisma.subscription.deleteMany();
+  await prisma.subscriptionPlan.deleteMany();
+  await prisma.etablissement.deleteMany();
+  await prisma.user.deleteMany();
 
   // Création des utilisateurs
   const userHotel = await prisma.user.create({
@@ -21,14 +26,14 @@ async function main() {
       email: 'hotel@example.com',
       name: 'Hotel User',
     },
-  })
+  });
 
   const userCar = await prisma.user.create({
     data: {
       email: 'car@example.com',
       name: 'Car User',
     },
-  })
+  });
 
   // Création d’un établissement hôtelier et son hôtel
   const hotelEtablissement = await prisma.etablissement.create({
@@ -47,7 +52,7 @@ async function main() {
         create: {},
       },
     },
-  })
+  });
 
   // Création d’un établissement agence et sa voiture
   const agenceEtablissement = await prisma.etablissement.create({
@@ -76,7 +81,7 @@ async function main() {
         },
       },
     },
-  })
+  });
 
   // Mise à jour des users pour lier leur établissement (si pas fait via owner)
   await prisma.user.update({
@@ -84,14 +89,14 @@ async function main() {
     data: {
       etablissementId: hotelEtablissement.id,
     },
-  })
+  });
 
   await prisma.user.update({
     where: { id: userCar.id },
     data: {
       etablissementId: agenceEtablissement.id,
     },
-  })
+  });
 
   // Création des plans d’abonnement
   const hotelPlan = await prisma.subscriptionPlan.create({
@@ -103,7 +108,7 @@ async function main() {
       maxImagesPerListing: 5,
       maxReservationsPerMonth: 100,
     },
-  })
+  });
 
   const carPlan = await prisma.subscriptionPlan.create({
     data: {
@@ -117,7 +122,7 @@ async function main() {
       canAccessAnalytics: true,
       prioritySupport: true,
     },
-  })
+  });
 
   // Création des abonnements liés aux établissements
   await prisma.subscription.create({
@@ -128,7 +133,7 @@ async function main() {
       endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
       status: SubscriptionStatus.ACTIVE,
     },
-  })
+  });
 
   await prisma.subscription.create({
     data: {
@@ -138,16 +143,16 @@ async function main() {
       endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
       status: SubscriptionStatus.ACTIVE,
     },
-  })
+  });
 
-  console.log('✅ Seed executed successfully.')
+  console.log('✅ Seed executed successfully.');
 }
 
 main()
   .catch((e) => {
-    console.error(e)
-    process.exit(1)
+    console.error(e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });

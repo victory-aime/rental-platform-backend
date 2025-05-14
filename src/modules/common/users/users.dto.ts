@@ -1,8 +1,5 @@
-
 export class UsersDto {
-
-  id?: string
+  id?: string;
   name?: string;
   email?: string;
-
 }

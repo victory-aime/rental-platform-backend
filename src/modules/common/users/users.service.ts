@@ -1,15 +1,10 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/config/services';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findUserByEmail(email: string): Promise<{
     user: User | null;
@@ -19,7 +14,7 @@ export class UsersService {
     });
 
     if (!user) {
-      return {user: null};
+      return { user: null };
     }
     return { user };
   }
@@ -32,12 +27,11 @@ export class UsersService {
     });
 
     if (!user) {
-      return {user:null};
+      return { user: null };
     }
     return { user };
   }
 
- 
   async userInfo(userId: string) {
     try {
       const user = await this.prisma.user.findUnique({
@@ -51,25 +45,23 @@ export class UsersService {
                   plan: true,
                 },
               },
-            
             },
           },
         },
       });
-  
+
       if (!user) {
         throw new BadRequestException('Utilisateur introuvable');
       }
-  
+
       const { keycloakId, ...safeUser } = user;
-  
+
       return {
         ...safeUser,
         etablissement: user.etablissement
           ? {
               ...user.etablissement,
               subscription: user.etablissement.subscription || null,
-           
             }
           : null,
       };
@@ -78,6 +70,4 @@ export class UsersService {
       throw new BadRequestException('Service indisponible pour le moment');
     }
   }
-  
-  
 }

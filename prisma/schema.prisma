@@ -90,16 +90,49 @@ model CarAgency {
 }
 
 model Car {
-  id          String       @id @default(uuid())
-  agenceId    String
-  name        String
-  brand       String
-  model       String
-  plateNumber String       @unique
-  dailyPrice  Float
-  available   Boolean      @default(true)
+  id            String          @id @default(uuid())
+  agenceId      String
+  name          String
+  brand         String
+  model         String
+  plateNumber   String          @unique
+  dailyPrice    Float
+  weeklyPrice   Float?
+  carImages     String[]
+  discountValue Float? // valeur de la remise
+  color         String? // code hexadécimal ou nom
+  transmission  String? // 'automatic' | 'manual'
+  fuelType      String? // 'essence' | 'diesel' | 'electrique' | 'hybride'
+  doors         Int?
+  seats         Int?
+  equipments    CarEquipments[] // Liste de noms d’équipements (checkbox)
+  discountType  DiscountType? // 'percentage' ou 'fixed'
+  carCategoryId String?
+  available     Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
   agence      CarAgency    @relation(fields: [agenceId], references: [id])
   bookings    BookingCar[]
+  carCategory CarCategory? @relation(fields: [carCategoryId], references: [id])
+}
+
+model CarCategory {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  cars      Car[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CarEquipments {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  carId       String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Car         Car?     @relation(fields: [carId], references: [id])
 }
 
 model BookingCar {
@@ -155,6 +188,11 @@ enum SubscriptionStatus {
 enum EtablissementType {
   HOTEL
   AGENCE
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
 }
 
 enum BookingStatus {
