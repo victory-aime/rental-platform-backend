@@ -1,6 +1,6 @@
 import {
   PrismaClient,
-  EtablissementType,
+  EstablishmentType,
   Plan,
   SubscriptionStatus,
 } from '@prisma/client';
@@ -17,7 +17,7 @@ async function main() {
   await prisma.carAgency.deleteMany();
   await prisma.subscription.deleteMany();
   await prisma.subscriptionPlan.deleteMany();
-  await prisma.etablissement.deleteMany();
+  await prisma.establishment.deleteMany();
   await prisma.user.deleteMany();
 
   // Création des utilisateurs
@@ -36,10 +36,10 @@ async function main() {
   });
 
   // Création d’un établissement hôtelier et son hôtel
-  const hotelEtablissement = await prisma.etablissement.create({
+  const hotelEstablishment = await prisma.establishment.create({
     data: {
       name: 'Hotel de Luxe',
-      type: EtablissementType.HOTEL,
+      type: EstablishmentType.HOTEL,
       address: 'Place Pampidou',
       city: 'Paris',
       country: 'France',
@@ -55,10 +55,10 @@ async function main() {
   });
 
   // Création d’un établissement agence et sa voiture
-  const agenceEtablissement = await prisma.etablissement.create({
+  const agenceEtablissement = await prisma.establishment.create({
     data: {
       name: 'Agence AutoLux',
-      type: EtablissementType.AGENCE,
+      type: EstablishmentType.AGENCE,
       address: 'Rue de Rivoli',
       city: 'Paris',
       country: 'France',
@@ -87,7 +87,7 @@ async function main() {
   await prisma.user.update({
     where: { id: userHotel.id },
     data: {
-      etablissementId: hotelEtablissement.id,
+      etablissementId: hotelEstablishment.id,
     },
   });
 
@@ -127,7 +127,7 @@ async function main() {
   // Création des abonnements liés aux établissements
   await prisma.subscription.create({
     data: {
-      etablissementId: hotelEtablissement.id,
+      establishmentId: hotelEstablishment.id,
       planId: hotelPlan.id,
       startDate: new Date(),
       endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
@@ -137,7 +137,7 @@ async function main() {
 
   await prisma.subscription.create({
     data: {
-      etablissementId: agenceEtablissement.id,
+      establishmentId: agenceEtablissement.id,
       planId: carPlan.id,
       startDate: new Date(),
       endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),

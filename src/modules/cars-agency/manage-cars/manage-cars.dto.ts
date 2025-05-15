@@ -1,4 +1,4 @@
-import { DiscountType } from '@prisma/client';
+import { DiscountType, VehicleStatus } from '@prisma/client';
 import {
   IsString,
   IsOptional,
@@ -6,14 +6,15 @@ import {
   IsEnum,
   IsArray,
   IsUUID,
-  IsHexColor,
   IsBoolean,
-  IsInt,
 } from 'class-validator';
 
 export class CreateCarDto {
   @IsUUID()
   agenceId: string;
+
+  @IsString()
+  agencyName?: string
 
   @IsString()
   name: string;
@@ -31,10 +32,6 @@ export class CreateCarDto {
   dailyPrice: number;
 
   @IsOptional()
-  @IsNumber()
-  weeklyPrice?: number;
-
-  @IsOptional()
   @IsEnum(DiscountType)
   discountType?: DiscountType;
 
@@ -43,8 +40,8 @@ export class CreateCarDto {
   discountValue?: number;
 
   @IsOptional()
-  @IsHexColor()
-  color?: string;
+  @IsString()
+  rentalPriceDiscounted?: number;
 
   @IsOptional()
   @IsString()
@@ -54,21 +51,26 @@ export class CreateCarDto {
   @IsString()
   fuelType?: string;
 
-  @IsOptional()
-  @IsInt()
+  @IsNumber()
   doors?: number;
 
-  @IsOptional()
-  @IsInt()
+  @IsNumber()
   seats?: number;
 
   @IsOptional()
   @IsUUID()
   carCategoryId?: string;
 
+  @IsString()
+  @IsArray()
+  carImages: string[];
+
   @IsOptional()
   @IsBoolean()
   available?: boolean;
+
+  @IsEnum(VehicleStatus)
+  satuts?: VehicleStatus
 
   @IsOptional()
   @IsArray()

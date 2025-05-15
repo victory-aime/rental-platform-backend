@@ -3,18 +3,17 @@ import { PrismaService } from '_config/services';
 
 @Injectable()
 export class EquipmentsService {
-  constructor(
-    private readonly prisma: PrismaService
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Retrieves all equipments from the database.
    *
    * @returns List of existing equipments.
    */
-  async getEquipments() {
+  async getEquipments(): Promise<{ id: string; name: string }[]> {
     try {
-      return await this.prisma.carEquipments.findMany();
+      const equipments = await this.prisma.carEquipments.findMany();
+      return equipments.map(({ id, name }) => ({ id, name }));
     } catch (error) {
       console.error('Error reading equipments:', error);
       throw new BadRequestException('Failed to read equipments');
@@ -23,14 +22,12 @@ export class EquipmentsService {
 
   /**
    * Adds one or multiple new equipments.
-   * 
+   *
    * @param data Single string, string[], or { name: string }[]
    * @throws {BadRequestException} If duplicates are detected or input format is invalid.
    * @returns Result message and list of newly added equipments.
    */
-  async addEquipments(
-    data: string | string[] | { name: string }[]
-  ): Promise<{
+  async addEquipments(data: string | string[] | { name: string }[]): Promise<{
     message: string;
     equipments: { id: string; name: string }[];
   }> {
@@ -69,14 +66,16 @@ export class EquipmentsService {
 
     if (existing.length > 0) {
       const existingNames = existing.map((c) => c.name).join(', ');
-      throw new BadRequestException(`equipments already exist: ${existingNames}`);
+      throw new BadRequestException(
+        `equipments already exist: ${existingNames}`,
+      );
     }
 
     // Create equipments
     const created = await Promise.all(
       [...uniqueNames].map((name) =>
-        this.prisma.carEquipments.create({ data: { name } })
-      )
+        this.prisma.carEquipments.create({ data: { name } }),
+      ),
     );
 
     return {

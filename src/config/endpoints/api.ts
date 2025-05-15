@@ -3,7 +3,8 @@ import { BASE_APIS_URL } from '../enum/global.enum';
 export const CARS_MODULES_APIS_URL = {
   CARS_MANAGEMENT: {
     GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/manage-cars`,
-    ADD_CAR: `${BASE_APIS_URL.SECURED}/manage-cars/add`,
+    ADD_CAR: `add`,
+    GET_CARS:'cars-list'
   },
 };
 

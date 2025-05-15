@@ -22,7 +22,7 @@ model User {
 
   // propriétaire d’un établissement
   etablissementId String?        @unique
-  etablissement   Etablissement? @relation(fields: [etablissementId], references: [id])
+  establishment   Establishment? @relation(fields: [etablissementId], references: [id])
 
   // réservations
   carBookings  BookingCar[]
@@ -34,10 +34,10 @@ model User {
   @@index([keycloakId, email, etablissementId])
 }
 
-model Etablissement {
+model Establishment {
   id          String            @id @default(uuid())
   name        String
-  type        EtablissementType // HOTEL, CARS, etc.
+  type        EstablishmentType // HOTEL, CARS, etc.
   description String?
   address     String
   city        String
@@ -55,8 +55,8 @@ model Etablissement {
 
 model Hotel {
   id              String        @id @default(uuid())
-  etablissementId String        @unique
-  etablissement   Etablissement @relation(fields: [etablissementId], references: [id])
+  establishmentId String        @unique
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
   rooms           Room[]
 }
 
@@ -84,33 +84,33 @@ model BookingRoom {
 
 model CarAgency {
   id              String        @id @default(uuid())
-  etablissementId String        @unique
-  etablissement   Etablissement @relation(fields: [etablissementId], references: [id])
+  establishmentId String        @unique
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
   cars            Car[]
 }
 
 model Car {
-  id            String          @id @default(uuid())
-  agenceId      String
-  name          String
-  brand         String
-  model         String
-  plateNumber   String          @unique
-  dailyPrice    Float
-  weeklyPrice   Float?
-  carImages     String[]
-  discountValue Float? // valeur de la remise
-  color         String? // code hexadécimal ou nom
-  transmission  String? // 'automatic' | 'manual'
-  fuelType      String? // 'essence' | 'diesel' | 'electrique' | 'hybride'
-  doors         Int?
-  seats         Int?
-  equipments    CarEquipments[] // Liste de noms d’équipements (checkbox)
-  discountType  DiscountType? // 'percentage' ou 'fixed'
-  carCategoryId String?
-  available     Boolean         @default(true)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id                    String          @id @default(uuid())
+  agenceId              String
+  name                  String
+  brand                 String
+  model                 String
+  plateNumber           String          @unique
+  dailyPrice            Float
+  carImages             String[]
+  discountValue         Float? // valeur de la remise
+  rentalPriceDiscounted Float? // prix après remise
+  transmission          String? // 'automatic' | 'manual'
+  fuelType              String? // 'essence' | 'diesel' | 'electrique' | 'hybride'
+  doors                 Int?
+  seats                 Int?
+  status                VehicleStatus   @default(AVAILABLE)
+  equipments            CarEquipments[] @relation("CarEquipmentsOnCars")
+  discountType          DiscountType? // 'percentage' ou 'fixed'
+  carCategoryId         String?
+  available             Boolean         @default(true)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
 
   agence      CarAgency    @relation(fields: [agenceId], references: [id])
   bookings    BookingCar[]
@@ -128,11 +128,10 @@ model CarCategory {
 model CarEquipments {
   id          String   @id @default(uuid())
   name        String   @unique
-  carId       String?
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  Car         Car?     @relation(fields: [carId], references: [id])
+  Car         Car[]    @relation("CarEquipmentsOnCars")
 }
 
 model BookingCar {
@@ -168,13 +167,13 @@ model SubscriptionPlan {
 
 model Subscription {
   id              String             @id @default(uuid())
-  etablissementId String             @unique
+  establishmentId String             @unique
   planId          String
   startDate       DateTime           @default(now())
   endDate         DateTime
   canceledAt      DateTime?
   status          SubscriptionStatus @default(PENDING)
-  etablissement   Etablissement      @relation(fields: [etablissementId], references: [id])
+  establishment   Establishment      @relation(fields: [establishmentId], references: [id])
   plan            SubscriptionPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
 }
 
@@ -185,7 +184,7 @@ enum SubscriptionStatus {
   EXPIRED
 }
 
-enum EtablissementType {
+enum EstablishmentType {
   HOTEL
   AGENCE
 }
@@ -193,6 +192,12 @@ enum EtablissementType {
 enum DiscountType {
   PERCENTAGE
   FIXED
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  MAINTENANCE
+  UNAVAILABLE
 }
 
 enum BookingStatus {

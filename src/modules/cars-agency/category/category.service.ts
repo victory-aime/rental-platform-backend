@@ -3,18 +3,17 @@ import { PrismaService } from '_config/services';
 
 @Injectable()
 export class CategoryService {
-  constructor(
-    private readonly prisma: PrismaService
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Retrieves all categories from the database.
    *
    * @returns List of existing categories.
    */
-  async getCategories() {
+  async getCategories(): Promise<{ id: string; name: string }[]> {
     try {
-      return await this.prisma.carCategory.findMany();
+      const categories = await this.prisma.carCategory.findMany();
+      return categories.map(({ id, name }) => ({ id, name }));
     } catch (error) {
       console.error('Error reading categories:', error);
       throw new BadRequestException('Failed to read categories');
@@ -23,14 +22,12 @@ export class CategoryService {
 
   /**
    * Adds one or multiple new categories.
-   * 
+   *
    * @param data Single string, string[], or { name: string }[]
    * @throws {BadRequestException} If duplicates are detected or input format is invalid.
    * @returns Result message and list of newly added categories.
    */
-  async addCategory(
-    data: string | string[] | { name: string }[]
-  ): Promise<{
+  async addCategory(data: string | string[] | { name: string }[]): Promise<{
     message: string;
     categories: { id: string; name: string }[];
   }> {
@@ -69,14 +66,16 @@ export class CategoryService {
 
     if (existing.length > 0) {
       const existingNames = existing.map((c) => c.name).join(', ');
-      throw new BadRequestException(`Categories already exist: ${existingNames}`);
+      throw new BadRequestException(
+        `Categories already exist: ${existingNames}`,
+      );
     }
 
     // Create categories
     const created = await Promise.all(
       [...uniqueNames].map((name) =>
-        this.prisma.carCategory.create({ data: { name } })
-      )
+        this.prisma.carCategory.create({ data: { name } }),
+      ),
     );
 
     return {
