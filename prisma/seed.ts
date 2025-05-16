@@ -30,8 +30,10 @@ async function main() {
 
   const userCar = await prisma.user.create({
     data: {
-      email: 'car@example.com',
-      name: 'Car User',
+      email: 'victorydarnelmbenze@gmail.com',
+      name: 'mbenze',
+      firstName: 'victory aime',
+      keycloakId: '4c5b1c14-c8a5-4503-a01d-18d07deab236',
     },
   });
 

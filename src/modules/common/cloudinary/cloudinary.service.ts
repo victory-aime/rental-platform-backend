@@ -13,13 +13,18 @@ export class CloudinaryService {
     });
   }
 
-  async uploadImage(buffer: Buffer, filename: string, folderPath: string): Promise<UploadApiResponse> {
+  async uploadImage(
+    buffer: Buffer,
+    filename: string,
+    folderPath: string,
+  ): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
           resource_type: 'image',
           public_id: filename,
           folder: folderPath, // exemple : cars/agency-name
+          overwrite: true,
         },
         (error, result) => {
           if (error) return reject(error);
@@ -30,12 +35,11 @@ export class CloudinaryService {
           }
         },
       );
-  
+
       const readable = new Readable();
       readable.push(buffer);
       readable.push(null);
       readable.pipe(stream);
     });
   }
-  
 }

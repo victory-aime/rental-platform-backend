@@ -37,7 +37,7 @@ export class UsersService {
       const user = await this.prisma.user.findUnique({
         where: { keycloakId: userId },
         include: {
-          etablissement: {
+          establishment: {
             include: {
               subscription: {
                 where: { status: 'ACTIVE' },
@@ -58,10 +58,10 @@ export class UsersService {
 
       return {
         ...safeUser,
-        etablissement: user.etablissement
+        establishment: user.establishment
           ? {
-              ...user.etablissement,
-              subscription: user.etablissement.subscription || null,
+              ...user.establishment,
+              subscription: user.establishment.subscription || null,
             }
           : null,
       };

@@ -12,7 +12,6 @@ export class UsersController {
   @UseGuards(KeycloakRolesGuard)
   @Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE, KEYCLOAK_USERS_ROLES.HOTELIER)
   async getUserInfo(@Query('userId') userId: string) {
-    console.log('userId', userId);
     return this.usersService.userInfo(userId);
   }
 }

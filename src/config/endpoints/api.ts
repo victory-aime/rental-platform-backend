@@ -4,7 +4,8 @@ export const CARS_MODULES_APIS_URL = {
   CARS_MANAGEMENT: {
     GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/manage-cars`,
     ADD_CAR: `add`,
-    GET_CARS:'cars-list'
+    UPDATE_CAR: 'update-car',
+    GET_CARS: 'cars-list',
   },
 };
 

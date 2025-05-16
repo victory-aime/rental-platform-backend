@@ -11,10 +11,13 @@ import {
 
 export class CreateCarDto {
   @IsUUID()
-  agenceId: string;
+  agencyId: string;
+
+  @IsUUID()
+  id?: string;
 
   @IsString()
-  agencyName?: string
+  agencyName?: string;
 
   @IsString()
   name: string;
@@ -70,7 +73,7 @@ export class CreateCarDto {
   available?: boolean;
 
   @IsEnum(VehicleStatus)
-  satuts?: VehicleStatus
+  satuts?: VehicleStatus;
 
   @IsOptional()
   @IsArray()
