@@ -7,6 +7,13 @@ export const CARS_MODULES_APIS_URL = {
     UPDATE_CAR: 'update-car',
     GET_CARS: 'cars-list',
   },
+  PARC_MANAGEMENT: {
+    GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/manage-parcs`,
+    LIST: 'list',
+    ADD: 'create-parc',
+    UPDATE: 'update-parc',
+    DELETE: 'delete-parc',
+  },
 };
 
 export const COMMON_API_URL = {

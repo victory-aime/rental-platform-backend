@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '_config/services';
 import { CreateCarDto } from './manage-cars.dto';
-import { Car } from '@prisma/client';
 import { restrictedCarsFields } from '_config/constants/restrictedCarsFields';
 
 @Injectable()

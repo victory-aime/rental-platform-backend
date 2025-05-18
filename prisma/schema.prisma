@@ -87,6 +87,7 @@ model CarAgency {
   establishmentId String        @unique
   establishment   Establishment @relation(fields: [establishmentId], references: [id])
   cars            Car[]
+  parcs           ParkingCar[]
 }
 
 model Car {
@@ -104,6 +105,7 @@ model Car {
   fuelType              String? // 'essence' | 'diesel' | 'electrique' | 'hybride'
   doors                 Int?
   seats                 Int?
+  parkingCarId          String?
   status                VehicleStatus   @default(AVAILABLE)
   equipments            CarEquipments[] @relation("CarEquipmentsOnCars")
   discountType          DiscountType? // 'percentage' ou 'fixed'
@@ -115,6 +117,7 @@ model Car {
   agence      CarAgency    @relation(fields: [agenceId], references: [id])
   bookings    BookingCar[]
   carCategory CarCategory? @relation(fields: [carCategoryId], references: [id])
+  parkingCar  ParkingCar?  @relation("CarsInParking", fields: [parkingCarId], references: [id])
 }
 
 model CarCategory {
@@ -132,6 +135,20 @@ model CarEquipments {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   Car         Car[]    @relation("CarEquipmentsOnCars")
+}
+
+model ParkingCar {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  address   String
+  agencyId  String?
+  listCar   Car[]      @relation("CarsInParking")
+  carAgency CarAgency? @relation(fields: [agencyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+
+  @@index([name, agencyId])
 }
 
 model BookingCar {

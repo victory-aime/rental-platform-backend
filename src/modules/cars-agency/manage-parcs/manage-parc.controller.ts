@@ -1,0 +1,60 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { ManageParcService } from './manage-parc.service';
+import { Roles } from '_config/guard/keycloak.guard';
+import { KEYCLOAK_USERS_ROLES } from '_config/enum/global.enum';
+import { PAGINATION } from '_config/constants/pagination';
+import { CARS_MODULES_APIS_URL } from '_config/endpoints/api';
+import { ParcDto } from './manage-parc.dto';
+
+@Controller(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.GLOBAL_ROUTES)
+export class ManageParcController {
+  constructor(private parcsService: ManageParcService) {}
+
+  @Get(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.LIST)
+  @Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
+  async parcList(
+    @Query('page') page = PAGINATION.INIT,
+    @Query('limit') limit = PAGINATION.LIMIT,
+    @Query('agencyId') agencyId?: string,
+  ) {
+    const filters = {
+      page,
+      limit,
+      agencyId,
+    };
+    return this.parcsService.listParcs(filters);
+  }
+
+  @Post(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.ADD)
+  @Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
+  async createParc(@Body() data: ParcDto) {
+    return this.parcsService.createParc(data);
+  }
+
+  @Post(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.UPDATE)
+  @Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
+  async updateParc(@Body() updateData: ParcDto) {
+    return this.parcsService.updateParc(updateData);
+  }
+
+  @Delete(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.DELETE)
+  @Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
+  async deleteParc(
+    @Query('agencyId') agencyId?: string,
+    @Query('name') name?: string,
+  ) {
+    const deleteData = {
+      agencyId,
+      name,
+    };
+    return this.parcsService.deleteParc(deleteData.agencyId, deleteData.name);
+  }
+}
