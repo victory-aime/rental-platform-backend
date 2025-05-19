@@ -20,6 +20,12 @@ export class ParcQueryDto {
   @IsString()
   agencyId?: string;
 
+  @IsString()
+  name?: string;
+
+  @IsNumber()
+  carsNumber?: number;
+
   @IsNumber()
   page?: number;
 

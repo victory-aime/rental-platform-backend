@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '_config/services';
 import { ParcDto, ParcQueryDto } from './manage-parc.dto';
-import { ParkingCar } from '@prisma/client';
+import { ParkingCar, Prisma } from '@prisma/client';
 import { PAGINATION } from '_config/constants/pagination';
 import { ManageCarService } from '../manage-cars/manage-cars.service';
 
@@ -25,29 +25,100 @@ export class ManageParcService {
   }> {
     const {
       agencyId,
+      name,
+      carsNumber,
       page = PAGINATION.INIT,
       limit = PAGINATION.LIMIT,
     } = query;
-    let findAgency;
-    if (agencyId) {
-      findAgency = await this.carsService.findAgency(agencyId); // vérifie l'existence de l'agence
-    }
+
+    console.log('query', query)
 
     const skip = (page - 1) * limit;
-    const whereClause = agencyId ? { agencyId: findAgency?.id } : {};
 
-    const [parcs, total] = await this.prisma.$transaction([
-      this.prisma.parkingCar.findMany({
-        where: whereClause,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          _count: { select: { listCar: true } },
+    const whereClause: Prisma.ParkingCarWhereInput = {};
+
+    if (agencyId) {
+      const agency = await this.carsService.findAgency(agencyId);
+      if (!agency) {
+        throw new NotFoundException(`Agence avec l'ID ${agencyId} non trouvée`);
+      }
+      whereClause.agencyId = agency.id;
+    }
+
+    if (name) {
+      whereClause.name = { contains: name, mode: 'insensitive' };
+    }
+
+    let parcs: ParkingCar[] = [];
+    let total = 0;
+
+    if (typeof carsNumber === 'number' && carsNumber !== 0) {
+      const grouped = await this.prisma.car.groupBy({
+        by: ['parkingCarId'],
+        where: {
+          parkingCarId: { not: null },
         },
-      }),
-      this.prisma.parkingCar.count({ where: whereClause }),
-    ]);
+        _count: { parkingCarId: true },
+        having: {
+          parkingCarId: {
+            _count: {
+              equals: carsNumber,
+            },
+          },
+        },
+      });
+
+      const matchingParkingIds = grouped
+        .map((g) => g.parkingCarId)
+        .filter((id): id is string => id !== null);
+
+      const [filteredParcs, filteredTotal] = await this.prisma.$transaction([
+        this.prisma.parkingCar.findMany({
+          where: {
+            ...whereClause,
+            id: {
+              in: matchingParkingIds.length
+                ? matchingParkingIds
+                : ['__empty__'],
+            },
+          },
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            _count: { select: { listCar: true } },
+          },
+        }),
+        this.prisma.parkingCar.count({
+          where: {
+            ...whereClause,
+            id: {
+              in: matchingParkingIds.length
+                ? matchingParkingIds
+                : ['__empty__'],
+            },
+          },
+        }),
+      ]);
+
+      parcs = filteredParcs;
+      total = filteredTotal;
+    } else {
+      const [allParcs, allTotal] = await this.prisma.$transaction([
+        this.prisma.parkingCar.findMany({
+          where: whereClause,
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            _count: { select: { listCar: true } },
+          },
+        }),
+        this.prisma.parkingCar.count({ where: whereClause }),
+      ]);
+      parcs = allParcs;
+      total = allTotal;
+    }
 
     return {
       content: parcs,
@@ -111,7 +182,6 @@ export class ManageParcService {
 
     const parc = await this.prisma.parkingCar.findFirst({
       where: {
-        name: data.name,
         agencyId: agency?.id,
       },
     });
@@ -134,6 +204,7 @@ export class ManageParcService {
 
       return { message: 'Parc mis à jour avec succès' };
     } catch (error) {
+      console.log('error', error);
       throw new BadRequestException('Erreur lors de la mise à jour du parc');
     }
   }
@@ -161,6 +232,7 @@ export class ManageParcService {
 
       return { message: 'Parc supprimé avec succès' };
     } catch (error) {
+      console.log(error);
       throw new BadRequestException('Erreur lors de la suppression du parc');
     }
   }

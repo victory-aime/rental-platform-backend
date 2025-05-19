@@ -13,6 +13,7 @@ import { KEYCLOAK_USERS_ROLES } from '_config/enum/global.enum';
 import { PAGINATION } from '_config/constants/pagination';
 import { CARS_MODULES_APIS_URL } from '_config/endpoints/api';
 import { ParcDto } from './manage-parc.dto';
+import { convertToInteger } from '_config/utils/convert';
 
 @Controller(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.GLOBAL_ROUTES)
 export class ManageParcController {
@@ -24,11 +25,15 @@ export class ManageParcController {
     @Query('page') page = PAGINATION.INIT,
     @Query('limit') limit = PAGINATION.LIMIT,
     @Query('agencyId') agencyId?: string,
+    @Query('name') name?: string,
+    @Query('carsNumber') carsNumber?: number,
   ) {
     const filters = {
-      page,
-      limit,
+      page: convertToInteger(page || '0'),
+      limit: convertToInteger(limit || '0'),
       agencyId,
+      name,
+      carsNumber: convertToInteger(carsNumber || '0'),
     };
     return this.parcsService.listParcs(filters);
   }

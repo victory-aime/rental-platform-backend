@@ -64,6 +64,11 @@ export class CreateCarDto {
   @IsUUID()
   carCategoryId?: string;
 
+    @IsOptional()
+  @IsUUID()
+  parkingCarId?: string;
+  
+
   @IsString()
   @IsArray()
   carImages: string[];

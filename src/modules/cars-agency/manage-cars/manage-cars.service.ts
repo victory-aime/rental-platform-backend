@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '_config/services';
 import { CreateCarDto } from './manage-cars.dto';
 import { restrictedCarsFields } from '_config/constants/restrictedCarsFields';
+import { connect } from 'http2';
 
 @Injectable()
 export class ManageCarService {
@@ -67,6 +68,7 @@ export class ManageCarService {
         include: {
           equipments: true,
           carCategory: true,
+          parkingCar:true,
           agence: true,
         },
       });
@@ -109,12 +111,13 @@ export class ManageCarService {
     }
 
     // Remove carCategoryId and equipmentIds from carData before updating
-    const { carCategoryId, equipmentIds, ...updateData } = carData;
+    const { carCategoryId,parkingCarId, equipmentIds, ...updateData } = carData;
 
     await this.prisma.car.update({
       where: { id: dto?.id },
       data: {
         ...updateData,
+        parkingCar: parkingCarId ? {connect : {id: parkingCarId}} : undefined,
         carCategory: carCategoryId
           ? { connect: { id: carCategoryId } }
           : undefined,
