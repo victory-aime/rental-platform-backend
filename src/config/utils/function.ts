@@ -5,6 +5,7 @@ export function normalizeCarDto(dto: CreateCarDto): CreateCarDto {
   const { agencyName, ...rest } = dto;
   return {
     ...rest,
+    parkingCarId: dto?.parkingCarId ? dto?.parkingCarId : undefined,
     dailyPrice: dto.dailyPrice && convertToFloat(dto.dailyPrice?.toString()),
     discountValue: dto.discountValue
       ? convertToFloat(dto.discountValue.toString())

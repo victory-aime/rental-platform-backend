@@ -83,20 +83,21 @@ model BookingRoom {
 }
 
 model CarAgency {
-  id              String        @id @default(uuid())
-  establishmentId String        @unique
-  establishment   Establishment @relation(fields: [establishmentId], references: [id])
+  id              String           @id @default(uuid())
+  establishmentId String           @unique
+  establishment   Establishment    @relation(fields: [establishmentId], references: [id])
   cars            Car[]
   parcs           ParkingCar[]
+  maintenances    CarMaintenance[]
 }
 
 model Car {
-  id                    String          @id @default(uuid())
+  id                    String           @id @default(uuid())
   agenceId              String
   name                  String
   brand                 String
   model                 String
-  plateNumber           String          @unique
+  plateNumber           String           @unique
   dailyPrice            Float
   carImages             String[]
   discountValue         Float? // valeur de la remise
@@ -106,13 +107,14 @@ model Car {
   doors                 Int?
   seats                 Int?
   parkingCarId          String?
-  status                VehicleStatus   @default(AVAILABLE)
-  equipments            CarEquipments[] @relation("CarEquipmentsOnCars")
+  status                VehicleStatus    @default(AVAILABLE)
+  equipments            CarEquipments[]  @relation("CarEquipmentsOnCars")
+  maintenances          CarMaintenance[]
   discountType          DiscountType? // 'percentage' ou 'fixed'
   carCategoryId         String?
-  available             Boolean         @default(true)
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
+  available             Boolean          @default(true)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
 
   agence      CarAgency    @relation(fields: [agenceId], references: [id])
   bookings    BookingCar[]
@@ -149,6 +151,28 @@ model ParkingCar {
   updateAt  DateTime @updatedAt
 
   @@index([name, agencyId])
+}
+
+model CarMaintenance {
+  id                 String            @id @default(uuid())
+  carId              String
+  agencyId           String?
+  title              String // Ex: "Vidange", "Changement de pneus"
+  description        String? // Détails additionnels
+  type               MaintenanceType   @default(PREVENTIVE)
+  status             MaintenanceStatus @default(PLANNED)
+  scheduledStartDate DateTime
+  scheduledEndDate   DateTime?
+  completedAt        DateTime?
+  cost               Float?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  car       Car        @relation(fields: [carId], references: [id])
+  carAgency CarAgency? @relation(fields: [agencyId], references: [id])
+
+  @@index([agencyId, status, cost])
+  @@index([carId, scheduledStartDate])
 }
 
 model BookingCar {
@@ -215,6 +239,19 @@ enum VehicleStatus {
   AVAILABLE
   MAINTENANCE
   UNAVAILABLE
+}
+
+enum MaintenanceType {
+  PREVENTIVE // Entretien régulier (vidange, filtres, etc.)
+  CORRECTIVE // Réparation suite à panne ou problème détecté
+  INSPECTION // Contrôle technique ou vérification périodique
+}
+
+enum MaintenanceStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
 }
 
 enum BookingStatus {

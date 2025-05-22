@@ -3,8 +3,15 @@ import { CategoryModule } from './category/category.module';
 import { ManageCarModule } from './manage-cars/manage-cars.module';
 import { EquipmentModule } from './equipments/equipment.module';
 import { ManageParcModule } from './manage-parcs/manage-parc.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 
 @Module({
-  imports: [CategoryModule, EquipmentModule, ManageCarModule, ManageParcModule],
+  imports: [
+    CategoryModule,
+    EquipmentModule,
+    ManageCarModule,
+    ManageParcModule,
+    MaintenanceModule,
+  ],
 })
 export class CarModules {}

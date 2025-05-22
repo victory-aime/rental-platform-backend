@@ -20,7 +20,8 @@
     "resolveJsonModule": true,
     "paths": {
       "baseUrl":["./src"],
-      "_config/*": ["./src/config/*"]
+      "_config/*": ["./src/config/*"],
+      "_common/*":["./src/modules/common/*"]
     }
   }
 }

@@ -6,25 +6,18 @@ import {
 import { PrismaService } from '_config/services';
 import { CreateCarDto } from './manage-cars.dto';
 import { restrictedCarsFields } from '_config/constants/restrictedCarsFields';
-import { connect } from 'http2';
+import { AgencyServices } from '_common/agency/agency.service';
 
 @Injectable()
 export class ManageCarService {
-  constructor(private prisma: PrismaService) {}
-
-  async findAgency(establishmentId: string) {
-    const findAgency = await this.prisma.carAgency.findUnique({
-      where: { establishmentId },
-    });
-    if (!findAgency) {
-      throw new NotFoundException('Aucune agency trouvee');
-    }
-    return findAgency;
-  }
+  constructor(
+    private prisma: PrismaService,
+    private readonly agencyService: AgencyServices,
+  ) {}
 
   async getCarsByAgencyId(establishmentId: string) {
     try {
-      const agency = await this.findAgency(establishmentId);
+      const agency = await this.agencyService.findAgency(establishmentId);
 
       return await this.prisma.car.findMany({
         where: { agenceId: agency?.id },
@@ -54,7 +47,7 @@ export class ManageCarService {
 
   async createCar(dto: CreateCarDto) {
     const { equipmentIds = [], agencyId, id, ...carData } = dto;
-    const agence = await this.findAgency(agencyId);
+    const agence = await this.agencyService.findAgency(agencyId);
 
     try {
       await this.prisma.car.create({
@@ -68,7 +61,7 @@ export class ManageCarService {
         include: {
           equipments: true,
           carCategory: true,
-          parkingCar:true,
+          parkingCar: true,
           agence: true,
         },
       });
@@ -111,13 +104,16 @@ export class ManageCarService {
     }
 
     // Remove carCategoryId and equipmentIds from carData before updating
-    const { carCategoryId,parkingCarId, equipmentIds, ...updateData } = carData;
+    const { carCategoryId, parkingCarId, equipmentIds, ...updateData } =
+      carData;
 
     await this.prisma.car.update({
       where: { id: dto?.id },
       data: {
         ...updateData,
-        parkingCar: parkingCarId ? {connect : {id: parkingCarId}} : undefined,
+        parkingCar: parkingCarId
+          ? { connect: { id: parkingCarId } }
+          : undefined,
         carCategory: carCategoryId
           ? { connect: { id: carCategoryId } }
           : undefined,

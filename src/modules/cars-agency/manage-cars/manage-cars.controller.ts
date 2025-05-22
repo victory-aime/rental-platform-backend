@@ -17,6 +17,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { UploadsService } from 'src/modules/common/uploads/uploads.service';
 import { normalizeCarDto } from '_config/utils/function';
 
+@Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
 @Controller(CARS_MODULES_APIS_URL.CARS_MANAGEMENT.GLOBAL_ROUTES)
 export class ManageCarsController {
   constructor(
@@ -25,7 +26,6 @@ export class ManageCarsController {
   ) {}
 
   @Post(CARS_MODULES_APIS_URL.CARS_MANAGEMENT.ADD_CAR)
-  @Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
   @UseInterceptors(FilesInterceptor('carImages'))
   async create(
     @Body() dto: CreateCarDto,
@@ -54,13 +54,11 @@ export class ManageCarsController {
   }
 
   @Get(CARS_MODULES_APIS_URL.CARS_MANAGEMENT.GET_CARS)
-  @Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
   async getCarsByAgencyId(@Query('establishment') establishment: string) {
     return this.carService.getCarsByAgencyId(establishment);
   }
 
   @Patch(CARS_MODULES_APIS_URL.CARS_MANAGEMENT.UPDATE_CAR)
-  @Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
   @UseInterceptors(FilesInterceptor('carImages'))
   async updateCar(
     @Body() dto: CreateCarDto,

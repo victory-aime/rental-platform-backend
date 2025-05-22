@@ -14,6 +14,13 @@ export const CARS_MODULES_APIS_URL = {
     UPDATE: 'update-parc',
     DELETE: 'delete-parc',
   },
+  MAINTENANCE_MANAGEMENT: {
+    GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/maintenances`,
+    LIST: 'list',
+    ADD: 'add',
+    UPDATE: 'update',
+    CLOSED: 'close-maintenance',
+  },
 };
 
 export const COMMON_API_URL = {

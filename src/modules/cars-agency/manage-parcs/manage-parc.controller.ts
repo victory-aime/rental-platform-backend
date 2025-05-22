@@ -15,12 +15,12 @@ import { CARS_MODULES_APIS_URL } from '_config/endpoints/api';
 import { ParcDto } from './manage-parc.dto';
 import { convertToInteger } from '_config/utils/convert';
 
+@Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
 @Controller(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.GLOBAL_ROUTES)
 export class ManageParcController {
   constructor(private parcsService: ManageParcService) {}
 
   @Get(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.LIST)
-  @Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
   async parcList(
     @Query('page') page = PAGINATION.INIT,
     @Query('limit') limit = PAGINATION.LIMIT,
@@ -39,19 +39,16 @@ export class ManageParcController {
   }
 
   @Post(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.ADD)
-  @Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
   async createParc(@Body() data: ParcDto) {
     return this.parcsService.createParc(data);
   }
 
   @Post(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.UPDATE)
-  @Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
   async updateParc(@Body() updateData: ParcDto) {
     return this.parcsService.updateParc(updateData);
   }
 
   @Delete(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.DELETE)
-  @Roles(KEYCLOAK_USERS_ROLES.AUTOMOBILISTE)
   async deleteParc(
     @Query('agencyId') agencyId?: string,
     @Query('name') name?: string,

@@ -8,13 +8,13 @@ import { PrismaService } from '_config/services';
 import { ParcDto, ParcQueryDto } from './manage-parc.dto';
 import { ParkingCar, Prisma } from '@prisma/client';
 import { PAGINATION } from '_config/constants/pagination';
-import { ManageCarService } from '../manage-cars/manage-cars.service';
+import { AgencyServices } from '_common/agency/agency.service';
 
 @Injectable()
 export class ManageParcService {
   constructor(
     private prisma: PrismaService,
-    private carsService: ManageCarService,
+    private agencyService: AgencyServices,
   ) {}
 
   async listParcs(query: ParcQueryDto): Promise<{
@@ -31,14 +31,14 @@ export class ManageParcService {
       limit = PAGINATION.LIMIT,
     } = query;
 
-    console.log('query', query)
+    console.log('query', query);
 
     const skip = (page - 1) * limit;
 
     const whereClause: Prisma.ParkingCarWhereInput = {};
 
     if (agencyId) {
-      const agency = await this.carsService.findAgency(agencyId);
+      const agency = await this.agencyService.findAgency(agencyId);
       if (!agency) {
         throw new NotFoundException(`Agence avec l'ID ${agencyId} non trouvée`);
       }
@@ -129,7 +129,7 @@ export class ManageParcService {
   }
 
   async findParc(agencyId?: string, name?: string) {
-    const agency = await this.carsService.findAgency(agencyId ?? '');
+    const agency = await this.agencyService.findAgency(agencyId ?? '');
 
     const parc = await this.prisma.parkingCar.findFirst({
       where: { name, agencyId: agency?.id },
@@ -144,7 +144,7 @@ export class ManageParcService {
   }
 
   async createParc(data: ParcDto): Promise<{ message: string }> {
-    const agency = await this.carsService.findAgency(data.agencyId ?? '');
+    const agency = await this.agencyService.findAgency(data.agencyId ?? '');
 
     const existingParc = await this.prisma.parkingCar.findFirst({
       where: {
@@ -178,7 +178,7 @@ export class ManageParcService {
   }
 
   async updateParc(data: ParcDto): Promise<{ message: string }> {
-    const agency = await this.carsService.findAgency(data.agencyId ?? '');
+    const agency = await this.agencyService.findAgency(data.agencyId ?? '');
 
     const parc = await this.prisma.parkingCar.findFirst({
       where: {
