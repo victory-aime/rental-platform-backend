@@ -7,9 +7,14 @@ import {
 import { KeycloakModule } from './modules/keycloak/keycloak.module';
 import { UsersModule } from './modules/common/users';
 import { CarModules } from './modules/cars-agency/cars.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+        ConfigModule.forRoot({
+      envFilePath: [`.env.${process.env.NODE_ENV || 'local'}`],
+      isGlobal: true,
+    }),
     WinstonModule.forRoot({
       transports: [
         new winston.transports.Console({

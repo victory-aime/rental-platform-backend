@@ -46,7 +46,7 @@ export class MaintenanceController {
   }
 
   @Post(CARS_MODULES_APIS_URL.MAINTENANCE_MANAGEMENT.CLOSED)
-  async closedMaintenance(@Query('requestId') requestId: string) {
-    return this.maintenanceService.closeMaintenance(requestId);
+  async closedMaintenance(@Body() data: {requestId: string}) {
+    return this.maintenanceService.closeMaintenance(data?.requestId);
   }
 }

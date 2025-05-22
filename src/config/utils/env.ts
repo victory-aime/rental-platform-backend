@@ -7,7 +7,6 @@ export const LoadEnvironmentVariables = () => {
 
   config({ path: envFilePath });
   console.log(`Environment loaded: ${process.env.DATABASE_URL}`);
-  console.log(`Environment loaded: ${process.env.JWT_SECRET_KEY}`);
 
-  console.log(`Environment loaded: ${env}`);
+  console.log(`Environment loaded: ${process.env.PORT}`);
 };

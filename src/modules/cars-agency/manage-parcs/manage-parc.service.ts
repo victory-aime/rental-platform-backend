@@ -31,7 +31,6 @@ export class ManageParcService {
       limit = PAGINATION.LIMIT,
     } = query;
 
-    console.log('query', query);
 
     const skip = (page - 1) * limit;
 
