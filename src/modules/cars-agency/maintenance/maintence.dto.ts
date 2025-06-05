@@ -71,5 +71,5 @@ export class FilterMaintenanceDto {
 
 export class UpdateMaintenanceDto extends CreateMaintenanceDto {
   @IsUUID()
-  id: string
+  id: string;
 }

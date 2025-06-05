@@ -2,10 +2,13 @@ import { Module } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { PrismaService } from 'src/config/services';
-import { KeycloakService } from 'src/modules/keycloak/keycloak.service';
+import { KeycloakModule } from 'src/modules/keycloak/keycloak.module';
+import { CloudinaryModule } from '_common/cloudinary/cloudinary.module';
+import { UploadsService } from '_common/uploads/uploads.service';
 
 @Module({
-  providers: [UsersService, PrismaService, KeycloakService],
+ imports: [KeycloakModule, CloudinaryModule],
+  providers: [UsersService, PrismaService, UploadsService],
   controllers: [UsersController],
   exports: [UsersService],
 })

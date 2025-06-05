@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ManageCarService } from './manage-cars.service';
-import { KeycloakService } from 'src/modules/keycloak/keycloak.service';
 import { PrismaService } from '_config/services';
 import { ManageCarsController } from './manage-cars.controller';
 import { UploadsService } from '_common/uploads/uploads.service';
@@ -12,7 +11,6 @@ import { AgencyServices } from '_common/agency/agency.service';
   controllers: [ManageCarsController],
   providers: [
     ManageCarService,
-    KeycloakService,
     AgencyServices,
     PrismaService,
     UploadsService,

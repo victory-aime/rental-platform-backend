@@ -31,7 +31,6 @@ export class ManageParcService {
       limit = PAGINATION.LIMIT,
     } = query;
 
-
     const skip = (page - 1) * limit;
 
     const whereClause: Prisma.ParkingCarWhereInput = {};

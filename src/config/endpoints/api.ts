@@ -27,6 +27,7 @@ export const COMMON_API_URL = {
   USER_MANAGEMENT: {
     GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/user`,
     USER_INFO: `${BASE_APIS_URL.SECURED}/user/me`,
+    USER_UPDATE: `${BASE_APIS_URL.SECURED}/user/update`,
   },
   CATEGORIES: {
     GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/categories`,

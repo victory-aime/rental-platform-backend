@@ -1,23 +1,19 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/config/services';
+import { UpdateKeycloakUserDto } from './users.dto';
+import { KeycloakService } from 'src/modules/keycloak/keycloak.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
-
-  async findUserByEmail(email: string): Promise<{
-    user: User | null;
-  }> {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      return { user: null };
-    }
-    return { user };
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly keycloakService: KeycloakService,
+  ) {}
 
   async findUserById(userId: string): Promise<{
     user: User | null;
@@ -65,6 +61,50 @@ export class UsersService {
             }
           : null,
       };
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException('Service indisponible pour le moment');
+    }
+  }
+
+  async updateUserInfo(
+    data: UpdateKeycloakUserDto,
+  ): Promise<{ message: string }> {
+    try {
+      return await this.prisma.$transaction(async (prisma) => {
+        const { user } = await this.findUserById(data?.keycloakId);
+        if (!user) {
+          throw new NotFoundException('Utilisateur introuvable');
+        }
+
+        const userUpdateData = Object.fromEntries(
+          Object.entries({
+            name: data?.name,
+            firstName: data?.firstName,
+            email: data?.email,
+            enabled2MFA: data?.enabled2MFA,
+            preferredLanguage: data?.preferredLanguage,
+            picture: data?.picture,
+          }).filter(([_, value]) => value !== undefined),
+        );
+
+        await prisma.user.update({
+          where: { id: user.id },
+          data: userUpdateData,
+        });
+
+        await this.keycloakService.updateUserProfile(data?.keycloakId, {
+          email: data?.email,
+          enabled2MFA: data?.enabled2MFA,
+          firstName: data?.firstName,
+          lastName: data?.name,
+          password: data?.newPassword,
+        });
+
+        return {
+          message: 'Compte mis à jour avec succès',
+        };
+      });
     } catch (error) {
       console.error(error);
       throw new BadRequestException('Service indisponible pour le moment');

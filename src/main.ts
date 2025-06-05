@@ -6,9 +6,9 @@ import { LoadEnvironmentVariables } from '_config/utils/env';
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-  LoadEnvironmentVariables()
+  LoadEnvironmentVariables();
   const app = await NestFactory.create(AppModule);
-  const PORT = 4000
+  const PORT = 4000;
 
   app.enableCors({
     origin: ['http://localhost:8070'],
