@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
@@ -14,6 +14,10 @@ export class UploadsService {
   }
 
   async uploadUsersImage(file: Express.Multer.File) {
+    if (!file?.originalname) {
+      throw new BadRequestException('Aucun fichier reçu ou fichier invalide');
+    }
+
     const folderPath = `users`;
     const filename = file.originalname.split('.')[0];
 

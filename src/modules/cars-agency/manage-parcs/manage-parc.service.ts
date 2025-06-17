@@ -170,7 +170,6 @@ export class ManageParcService {
 
       return { message: 'Le parc a été ajouté avec succès' };
     } catch (error) {
-      console.log('error', error);
       throw new BadRequestException("Erreur lors de l'ajout du parc");
     }
   }
@@ -202,7 +201,6 @@ export class ManageParcService {
 
       return { message: 'Parc mis à jour avec succès' };
     } catch (error) {
-      console.log('error', error);
       throw new BadRequestException('Erreur lors de la mise à jour du parc');
     }
   }
@@ -230,7 +228,6 @@ export class ManageParcService {
 
       return { message: 'Parc supprimé avec succès' };
     } catch (error) {
-      console.log(error);
       throw new BadRequestException('Erreur lors de la suppression du parc');
     }
   }

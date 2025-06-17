@@ -3,6 +3,8 @@ import {
   Controller,
   Get,
   Patch,
+  Post,
+  Put,
   Query,
   UploadedFiles,
   UseGuards,
@@ -37,12 +39,26 @@ export class UsersController {
   ) {
     let cloudinaryFileUrl: string = '';
     if (file) {
-      const uploadResult = await this.uploadFiles.uploadUsersImage(file);
+      const uploadResult = await this.uploadFiles.uploadUsersImage(file[0]);
       cloudinaryFileUrl = uploadResult.secure_url;
     }
     return this.usersService.updateUserInfo({
       ...data,
+      enabled2MFA: Boolean(data.enabled2MFA),
       picture: cloudinaryFileUrl,
     });
+  }
+
+  @Put(COMMON_API_URL.USER_MANAGEMENT.DEACTIVATE_OR_ACTIVATE_ACCOUNT)
+  async deactivateAccount(
+    @Body() data: { keycloakId: string; deactivateUser: boolean },
+  ) {
+    return this.usersService.deactivateOrDisabledUser(data);
+  }
+
+  @Post(COMMON_API_URL.USER_MANAGEMENT.CLEAR_ALL_SESSIONS)
+  async clearSessions(@Body() keycloakId: string) {
+    console.log('keycloakId', keycloakId);
+    return this.usersService.clearAllSessions(keycloakId);
   }
 }

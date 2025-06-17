@@ -85,26 +85,87 @@ export class UsersService {
             enabled2MFA: data?.enabled2MFA,
             preferredLanguage: data?.preferredLanguage,
             picture: data?.picture,
-          }).filter(([_, value]) => value !== undefined),
+          }).filter(([_, value]) => value !== undefined && value !== ''),
         );
 
         await prisma.user.update({
           where: { id: user.id },
-          data: userUpdateData,
+          data: {
+            ...userUpdateData,
+            picture: data?.picture ?? user.picture,
+            enabled2MFA: data?.enabled2MFA ?? user.enabled2MFA,
+          },
         });
 
-        await this.keycloakService.updateUserProfile(data?.keycloakId, {
-          email: data?.email,
-          enabled2MFA: data?.enabled2MFA,
-          firstName: data?.firstName,
-          lastName: data?.name,
-          password: data?.newPassword,
-        });
+        const shouldUpdate2MFA =
+          typeof data?.enabled2MFA === 'boolean' &&
+          data.enabled2MFA &&
+          user.enabled2MFA === false;
+
+        const keycloakPayload = Object.fromEntries(
+          Object.entries({
+            email: data?.email,
+            firstName: data?.firstName,
+            lastName: data?.name,
+            password: data?.newPassword,
+            enabled2MFA: shouldUpdate2MFA ? true : undefined,
+          }).filter(([_, value]) => value !== undefined),
+        );
+
+        if (Object.keys(keycloakPayload).length > 0) {
+          await this.keycloakService.updateUserProfile(
+            data?.keycloakId,
+            keycloakPayload,
+          );
+        }
 
         return {
           message: 'Compte mis à jour avec succès',
         };
       });
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException('Service indisponible pour le moment');
+    }
+  }
+
+  async deactivateOrDisabledUser(data: {
+    keycloakId: string;
+    deactivateUser: boolean;
+  }) {
+    try {
+      const { user } = await this.findUserById(data.keycloakId);
+      if (!user) {
+        throw new NotFoundException('Utilisateur introuvable');
+      }
+
+      if (data.deactivateUser) {
+        await this.keycloakService.deactivateOrEnabledUser(
+          data.keycloakId,
+          data?.deactivateUser,
+        );
+      } else {
+        await this.keycloakService.deactivateOrEnabledUser(
+          data.keycloakId,
+          data?.deactivateUser,
+        );
+      }
+      return {
+        message: `Compte ${data.deactivateUser ? 'supprimer' : 'activé'} avec succès`,
+      };
+    } catch (e) {
+      console.error(e);
+      throw new BadRequestException('Service indisponible pour le moment');
+    }
+  }
+
+  async clearAllSessions(keycloakId: string): Promise<void> {
+    try {
+      const { user } = await this.findUserById(keycloakId);
+      if (!user) {
+        throw new NotFoundException('Utilisateur introuvable');
+      }
+      await this.keycloakService.closeAllSessions(keycloakId);
     } catch (error) {
       console.error(error);
       throw new BadRequestException('Service indisponible pour le moment');

@@ -23,7 +23,7 @@ export class CloudinaryService {
         {
           resource_type: 'image',
           public_id: filename,
-          folder: folderPath, // exemple : cars/agency-name
+          folder: folderPath,
           overwrite: true,
         },
         (error, result) => {

@@ -27,7 +27,9 @@ export const COMMON_API_URL = {
   USER_MANAGEMENT: {
     GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/user`,
     USER_INFO: `${BASE_APIS_URL.SECURED}/user/me`,
-    USER_UPDATE: `${BASE_APIS_URL.SECURED}/user/update`,
+    USER_UPDATE: `${BASE_APIS_URL.SECURED}/user/update-user`,
+    DEACTIVATE_OR_ACTIVATE_ACCOUNT: `${BASE_APIS_URL.SECURED}/user/deactivate-activate-account`,
+    CLEAR_ALL_SESSIONS: `${BASE_APIS_URL.SECURED}/user/clear-all-sessions`,
   },
   CATEGORIES: {
     GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/categories`,

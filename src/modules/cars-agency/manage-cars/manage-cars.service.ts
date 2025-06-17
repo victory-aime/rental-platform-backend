@@ -40,7 +40,6 @@ export class ManageCarService {
         },
       });
     } catch (error) {
-      console.log('error', error);
       throw new BadRequestException('Failed to fetch cars');
     }
   }

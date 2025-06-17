@@ -34,43 +34,100 @@ export class KeycloakService {
   async updateUserProfile(
     keycloakId: string,
     values: keycloakUserDto,
-  ): Promise<{ message: string }> {
-    if (!keycloakId) {
-      throw new BadRequestException('ID utilisateur Keycloak manquant');
-    }
-
-    const { enabled2MFA, ...userValues } = values;
-
-    const payload: Record<string, any> = {
-      ...userValues,
-    };
-
-    if (enabled2MFA) {
-      payload.requiredActions = ['CONFIGURE_TOTP'];
-    }
-
-    if (Object.keys(payload).length === 0) {
-      throw new BadRequestException('Aucune donnée à mettre à jour');
-    }
-
+  ): Promise<void> {
     try {
-      const headers = await this.getAuthHeaders();
+      const token = await this.getAdminToken();
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
 
-      await axios.put(
-        `http://localhost:8080/admin/realms/rental-platform/users/${keycloakId}`,
-        payload,
-        {
-          headers,
-        },
-      );
+      const { enabled2MFA, password, ...userFields } = values;
 
-      return { message: 'Mise à jour effectuée avec succès' };
+      // Préparation du payload utilisateur (profil)
+      const userPayload: Record<string, any> = {
+        ...Object.fromEntries(
+          Object.entries(userFields).filter(([_, v]) => v !== undefined),
+        ),
+      };
+
+      // Ajout de l'action MFA si nécessaire
+      if (enabled2MFA === true) {
+        userPayload.requiredActions = ['CONFIGURE_TOTP'];
+      }
+
+      // Envoi de la mise à jour du profil si au moins une info est présente
+      if (Object.keys(userPayload).length > 0) {
+        await axios.put(
+          `http://localhost:8080/admin/realms/rental-platform/users/${keycloakId}`,
+          userPayload,
+          { headers },
+        );
+      }
+
+      // Mise à jour du mot de passe si nécessaire
+      if (password) {
+        await axios.put(
+          `http://localhost:8080/admin/realms/rental-platform/users/${keycloakId}/reset-password`,
+          {
+            type: 'password',
+            value: password,
+            temporary: false,
+          },
+          { headers },
+        );
+      }
     } catch (error) {
       console.error(
-        '❌ Erreur lors de la mise à jour utilisateur Keycloak:',
-        error,
+        '❌ Erreur updateUserProfile Keycloak:',
+        error?.response?.data || error,
       );
       throw new BadRequestException('Échec de la mise à jour de l’utilisateur');
+    }
+  }
+
+  async deactivateOrEnabledUser(keycloakId: string, enabled: boolean) {
+    const token = await this.getAdminToken();
+    try {
+      await axios.put(
+        `http://localhost:8080/admin/realms/rental-platform/users/${keycloakId}`,
+        { enabled: enabled },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async closeAllSessions(keycloakId: string): Promise<void> {
+    try {
+      const token = await this.getAdminToken();
+      if (!keycloakId) {
+        throw new BadRequestException(
+          'Keycloak ID est requis pour fermer les sessions',
+        );
+      }
+      await axios.post(
+        `http://localhost:8080/admin/realms/rental-platform/users/${keycloakId}/logout`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    } catch (error) {
+      console.error(
+        '❌ Erreur closeAllSessions Keycloak:',
+        error?.response?.data || error,
+      );
+      throw new BadRequestException('Échec de la fermeture des sessions');
     }
   }
 }
