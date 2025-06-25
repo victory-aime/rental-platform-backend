@@ -5,17 +5,12 @@ import {
   IsDateString,
   IsEnum,
   IsNumber,
-  isUUID,
 } from 'class-validator';
 import { MaintenanceStatus, MaintenanceType } from '@prisma/client';
 
 export class CreateMaintenanceDto {
   @IsUUID()
   carId: string;
-
-  @IsUUID()
-  @IsOptional()
-  agencyId?: string;
 
   @IsString()
   title: string;

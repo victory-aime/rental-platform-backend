@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { MaintenanceService } from './maintenace.service';
 import {
   CreateMaintenanceDto,
@@ -36,17 +36,23 @@ export class MaintenanceController {
   }
 
   @Post(CARS_MODULES_APIS_URL.MAINTENANCE_MANAGEMENT.ADD)
-  async createMaintenance(@Body() data: CreateMaintenanceDto) {
-    return this.maintenanceService.createMaintenance(data);
+  async createMaintenance(
+    @Body() data: CreateMaintenanceDto,
+    @Query('agencyId') agencyId: string,
+  ) {
+    return this.maintenanceService.createMaintenance(data, agencyId);
   }
 
   @Post(CARS_MODULES_APIS_URL.MAINTENANCE_MANAGEMENT.UPDATE)
-  async updateMaintenance(@Body() data: UpdateMaintenanceDto) {
-    return this.maintenanceService.updateMaintenance(data);
+  async updateMaintenance(
+    @Body() data: UpdateMaintenanceDto,
+    @Query('agencyId') agencyId: string,
+  ) {
+    return this.maintenanceService.updateMaintenance(data, agencyId);
   }
 
   @Post(CARS_MODULES_APIS_URL.MAINTENANCE_MANAGEMENT.CLOSED)
-  async closedMaintenance(@Body() data: { requestId: string }) {
-    return this.maintenanceService.closeMaintenance(data?.requestId);
+  async closedMaintenance(@Query('requestId') requestId: string) {
+    return this.maintenanceService.closeMaintenance(requestId);
   }
 }

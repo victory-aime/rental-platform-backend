@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { ManageParcService } from './manage-parc.service';
 import { Roles } from '_config/guard/keycloak.guard';
 import { KEYCLOAK_USERS_ROLES } from '_config/enum/global.enum';
@@ -24,28 +16,30 @@ export class ManageParcController {
   async parcList(
     @Query('page') page = PAGINATION.INIT,
     @Query('limit') limit = PAGINATION.LIMIT,
-    @Query('agencyId') agencyId?: string,
+    @Query('agencyId') agencyId: string,
     @Query('name') name?: string,
     @Query('carsNumber') carsNumber?: number,
   ) {
     const filters = {
       page: convertToInteger(page || '0'),
       limit: convertToInteger(limit || '0'),
-      agencyId,
       name,
       carsNumber: convertToInteger(carsNumber || '0'),
     };
-    return this.parcsService.listParcs(filters);
+    return this.parcsService.listParcs(filters, agencyId);
   }
 
   @Post(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.ADD)
-  async createParc(@Body() data: ParcDto) {
-    return this.parcsService.createParc(data);
+  async createParc(@Body() data: ParcDto, @Query('agencyId') agencyId: string) {
+    return this.parcsService.createParc(data, agencyId);
   }
 
   @Post(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.UPDATE)
-  async updateParc(@Body() updateData: ParcDto) {
-    return this.parcsService.updateParc(updateData);
+  async updateParc(
+    @Body() updateData: ParcDto,
+    @Query('agencyId') agencyId: string,
+  ) {
+    return this.parcsService.updateParc(updateData, agencyId);
   }
 
   @Delete(CARS_MODULES_APIS_URL.PARC_MANAGEMENT.DELETE)
@@ -53,10 +47,6 @@ export class ManageParcController {
     @Query('agencyId') agencyId?: string,
     @Query('name') name?: string,
   ) {
-    const deleteData = {
-      agencyId,
-      name,
-    };
-    return this.parcsService.deleteParc(deleteData.agencyId, deleteData.name);
+    return this.parcsService.deleteParc(agencyId, name);
   }
 }

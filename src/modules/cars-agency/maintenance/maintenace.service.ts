@@ -58,8 +58,8 @@ export class MaintenanceService {
     }
   }
 
-  async createMaintenance(dto: CreateMaintenanceDto) {
-    const agency = await this.agencyService.findAgency(dto?.agencyId ?? '');
+  async createMaintenance(dto: CreateMaintenanceDto, agencyId: string) {
+    const agency = await this.agencyService.findAgency(agencyId);
 
     const car = await this.prisma.car.findUnique({
       where: { id: dto.carId },
@@ -131,8 +131,8 @@ export class MaintenanceService {
     };
   }
 
-  async updateMaintenance(dto: UpdateMaintenanceDto) {
-    const agency = await this.agencyService.findAgency(dto?.agencyId ?? '');
+  async updateMaintenance(dto: UpdateMaintenanceDto, agencyId: string) {
+    const agency = await this.agencyService.findAgency(agencyId);
     const { id: extractId, ...rest } = dto;
     return this.prisma.carMaintenance.update({
       where: { id: extractId },
@@ -162,7 +162,7 @@ export class MaintenanceService {
       return {
         message: 'La maintenance de ce vehicule a ete terminée',
       };
-    } catch (error) {
+    } catch {
       throw new BadRequestException(
         'Probleme survenu lors de la cloture de cette maintenance',
       );

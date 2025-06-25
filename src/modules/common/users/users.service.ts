@@ -90,11 +90,7 @@ export class UsersService {
 
         await prisma.user.update({
           where: { id: user.id },
-          data: {
-            ...userUpdateData,
-            picture: data?.picture ?? user.picture,
-            enabled2MFA: data?.enabled2MFA ?? user.enabled2MFA,
-          },
+          data: userUpdateData,
         });
 
         const shouldUpdate2MFA =

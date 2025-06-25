@@ -39,20 +39,20 @@ export class ManageCarService {
           createdAt: 'desc',
         },
       });
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Failed to fetch cars');
     }
   }
 
-  async createCar(dto: CreateCarDto) {
-    const { equipmentIds = [], agencyId, id, ...carData } = dto;
-    const agence = await this.agencyService.findAgency(agencyId);
+  async createCar(dto: CreateCarDto, agencyId: string) {
+    const { equipmentIds = [], ...carData } = dto;
+    const agency = await this.agencyService.findAgency(agencyId);
 
     try {
       await this.prisma.car.create({
         data: {
           ...carData,
-          agenceId: agence?.id,
+          agenceId: agency?.id,
           equipments: {
             connect: equipmentIds.map((name) => ({ name })),
           },
@@ -74,10 +74,12 @@ export class ManageCarService {
     }
   }
 
-  async updateCar(dto: CreateCarDto): Promise<{ message: string }> {
-    const { agencyId, ...carData } = dto;
+  async updateCar(
+    dto: CreateCarDto,
+    requestId: string,
+  ): Promise<{ message: string }> {
     const car = await this.prisma.car.findUnique({
-      where: { id: dto?.id },
+      where: { id: requestId },
       include: {
         bookings: {
           where: {
@@ -103,11 +105,10 @@ export class ManageCarService {
     }
 
     // Remove carCategoryId and equipmentIds from carData before updating
-    const { carCategoryId, parkingCarId, equipmentIds, ...updateData } =
-      carData;
+    const { carCategoryId, parkingCarId, equipmentIds, ...updateData } = dto;
 
     await this.prisma.car.update({
-      where: { id: dto?.id },
+      where: { id: requestId },
       data: {
         ...updateData,
         parkingCar: parkingCarId

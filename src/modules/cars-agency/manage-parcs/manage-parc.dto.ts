@@ -1,11 +1,7 @@
 import { Car } from '@prisma/client';
-import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsString } from 'class-validator';
 
 export class ParcDto {
-  @IsOptional()
-  @IsString()
-  agencyId?: string;
-
   @IsString()
   name: string;
 
@@ -17,9 +13,6 @@ export class ParcDto {
 }
 
 export class ParcQueryDto {
-  @IsString()
-  agencyId?: string;
-
   @IsString()
   name?: string;
 

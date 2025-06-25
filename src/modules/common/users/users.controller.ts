@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
   Post,
   Put,
@@ -57,7 +58,7 @@ export class UsersController {
   }
 
   @Post(COMMON_API_URL.USER_MANAGEMENT.CLEAR_ALL_SESSIONS)
-  async clearSessions(@Body() keycloakId: string) {
+  async clearSessions(@Query('keycloakId') keycloakId: string) {
     console.log('keycloakId', keycloakId);
     return this.usersService.clearAllSessions(keycloakId);
   }

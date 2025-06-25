@@ -2,7 +2,7 @@ import { CreateCarDto } from 'src/modules/cars-agency/manage-cars/manage-cars.dt
 import { convertToFloat, convertToInteger } from './convert';
 
 export function normalizeCarDto(dto: CreateCarDto): CreateCarDto {
-  const { agencyName, ...rest } = dto;
+  const { ...rest } = dto;
   return {
     ...rest,
     parkingCarId: dto?.parkingCarId ? dto?.parkingCarId : undefined,

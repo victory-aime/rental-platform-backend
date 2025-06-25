@@ -17,14 +17,16 @@ export class ManageParcService {
     private agencyService: AgencyServices,
   ) {}
 
-  async listParcs(query: ParcQueryDto): Promise<{
+  async listParcs(
+    query: ParcQueryDto,
+    agencyId: string,
+  ): Promise<{
     content: ParkingCar[];
     totalPages: number;
     currentPage: number;
     totalDataPerPage: number;
   }> {
     const {
-      agencyId,
       name,
       carsNumber,
       page = PAGINATION.INIT,
@@ -141,8 +143,11 @@ export class ManageParcService {
     return parc;
   }
 
-  async createParc(data: ParcDto): Promise<{ message: string }> {
-    const agency = await this.agencyService.findAgency(data.agencyId ?? '');
+  async createParc(
+    data: ParcDto,
+    agencyId: string,
+  ): Promise<{ message: string }> {
+    const agency = await this.agencyService.findAgency(agencyId);
 
     const existingParc = await this.prisma.parkingCar.findFirst({
       where: {
@@ -169,14 +174,16 @@ export class ManageParcService {
       });
 
       return { message: 'Le parc a été ajouté avec succès' };
-    } catch (error) {
+    } catch {
       throw new BadRequestException("Erreur lors de l'ajout du parc");
     }
   }
 
-  async updateParc(data: ParcDto): Promise<{ message: string }> {
-    const agency = await this.agencyService.findAgency(data.agencyId ?? '');
-
+  async updateParc(
+    data: ParcDto,
+    agencyId: string,
+  ): Promise<{ message: string }> {
+    const agency = await this.agencyService.findAgency(agencyId);
     const parc = await this.prisma.parkingCar.findFirst({
       where: {
         agencyId: agency?.id,
@@ -200,7 +207,7 @@ export class ManageParcService {
       });
 
       return { message: 'Parc mis à jour avec succès' };
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Erreur lors de la mise à jour du parc');
     }
   }
@@ -227,7 +234,7 @@ export class ManageParcService {
       });
 
       return { message: 'Parc supprimé avec succès' };
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Erreur lors de la suppression du parc');
     }
   }

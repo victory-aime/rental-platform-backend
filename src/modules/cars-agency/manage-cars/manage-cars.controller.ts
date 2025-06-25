@@ -29,6 +29,8 @@ export class ManageCarsController {
   @UseInterceptors(FilesInterceptor('carImages'))
   async create(
     @Body() dto: CreateCarDto,
+    @Query('agencyId') agencyId: string,
+    @Query('agencyName') agencyName: string,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     let cloudinaryFilesUrl: string[] = [];
@@ -36,10 +38,7 @@ export class ManageCarsController {
     if (files && files.length > 0) {
       const uploadResults = await Promise.all(
         files.map((file) =>
-          this.uploadFiles.uploadImage(
-            file,
-            dto?.agencyName || 'default-agency',
-          ),
+          this.uploadFiles.uploadImage(file, agencyName || 'default-agency'),
         ),
       );
       cloudinaryFilesUrl = uploadResults.map((res) => res.secure_url);
@@ -47,10 +46,13 @@ export class ManageCarsController {
 
     const data = normalizeCarDto(dto);
 
-    return this.carService.createCar({
-      ...data,
-      carImages: cloudinaryFilesUrl,
-    });
+    return this.carService.createCar(
+      {
+        ...data,
+        carImages: cloudinaryFilesUrl,
+      },
+      agencyId,
+    );
   }
 
   @Get(CARS_MODULES_APIS_URL.CARS_MANAGEMENT.GET_CARS)
@@ -62,6 +64,8 @@ export class ManageCarsController {
   @UseInterceptors(FilesInterceptor('carImages'))
   async updateCar(
     @Body() dto: CreateCarDto,
+    @Query('requestId') requestId: string,
+    @Query('agencyName') agencyName: string,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     let cloudinaryFilesUrl: string[] = [];
@@ -69,10 +73,7 @@ export class ManageCarsController {
     if (files && files.length > 0) {
       const uploadResults = await Promise.all(
         files.map((file) =>
-          this.uploadFiles.uploadImage(
-            file,
-            dto?.agencyName || 'default-agency',
-          ),
+          this.uploadFiles.uploadImage(file, agencyName || 'default-agency'),
         ),
       );
       cloudinaryFilesUrl = uploadResults.map((res) => res.secure_url);
@@ -80,9 +81,12 @@ export class ManageCarsController {
 
     const data = normalizeCarDto(dto);
 
-    return this.carService.updateCar({
-      ...data,
-      carImages: cloudinaryFilesUrl,
-    });
+    return this.carService.updateCar(
+      {
+        ...data,
+        carImages: cloudinaryFilesUrl,
+      },
+      requestId,
+    );
   }
 }

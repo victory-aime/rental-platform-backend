@@ -10,15 +10,6 @@ import {
 } from 'class-validator';
 
 export class CreateCarDto {
-  @IsUUID()
-  agencyId: string;
-
-  @IsUUID()
-  id?: string;
-
-  @IsString()
-  agencyName?: string;
-
   @IsString()
   name: string;
 
