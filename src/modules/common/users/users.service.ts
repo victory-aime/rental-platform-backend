@@ -15,11 +15,11 @@ export class UsersService {
     private readonly keycloakService: KeycloakService,
   ) {}
 
-  async findUserById(userId: string): Promise<{
+  async findUserById(keycloakId: string): Promise<{
     user: User | null;
   }> {
     const user = await this.prisma.user.findUnique({
-      where: { keycloakId: userId },
+      where: { keycloakId },
     });
 
     if (!user) {
@@ -50,10 +50,8 @@ export class UsersService {
         throw new BadRequestException('Utilisateur introuvable');
       }
 
-      const { keycloakId, ...safeUser } = user;
-
       return {
-        ...safeUser,
+        ...user,
         establishment: user.establishment
           ? {
               ...user.establishment,
@@ -69,10 +67,11 @@ export class UsersService {
 
   async updateUserInfo(
     data: UpdateKeycloakUserDto,
+    keycloakId: string,
   ): Promise<{ message: string }> {
     try {
       return await this.prisma.$transaction(async (prisma) => {
-        const { user } = await this.findUserById(data?.keycloakId);
+        const { user } = await this.findUserById(keycloakId);
         if (!user) {
           throw new NotFoundException('Utilisateur introuvable');
         }
@@ -110,7 +109,7 @@ export class UsersService {
 
         if (Object.keys(keycloakPayload).length > 0) {
           await this.keycloakService.updateUserProfile(
-            data?.keycloakId,
+            keycloakId,
             keycloakPayload,
           );
         }
@@ -125,29 +124,26 @@ export class UsersService {
     }
   }
 
-  async deactivateOrDisabledUser(data: {
-    keycloakId: string;
-    deactivateUser: boolean;
-  }) {
+  async deactivateOrDisabledUser(keycloakId: string, deactivateUser: boolean) {
     try {
-      const { user } = await this.findUserById(data.keycloakId);
+      const { user } = await this.findUserById(keycloakId);
       if (!user) {
         throw new NotFoundException('Utilisateur introuvable');
       }
 
-      if (data.deactivateUser) {
+      if (deactivateUser) {
         await this.keycloakService.deactivateOrEnabledUser(
-          data.keycloakId,
-          data?.deactivateUser,
+          keycloakId,
+          deactivateUser,
         );
       } else {
         await this.keycloakService.deactivateOrEnabledUser(
-          data.keycloakId,
-          data?.deactivateUser,
+          keycloakId,
+          deactivateUser,
         );
       }
       return {
-        message: `Compte ${data.deactivateUser ? 'supprimer' : 'activé'} avec succès`,
+        message: `Compte ${deactivateUser ? 'supprimer' : 'activé'} avec succès`,
       };
     } catch (e) {
       console.error(e);

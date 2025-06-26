@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Patch,
   Post,
   Put,
@@ -36,6 +35,7 @@ export class UsersController {
   @UseInterceptors(FilesInterceptor('picture'))
   async updateInfo(
     @Body() data: UpdateKeycloakUserDto,
+    @Query('keycloakId') keycloakId: string,
     @UploadedFiles() file: Express.Multer.File,
   ) {
     let cloudinaryFileUrl: string = '';
@@ -43,18 +43,25 @@ export class UsersController {
       const uploadResult = await this.uploadFiles.uploadUsersImage(file[0]);
       cloudinaryFileUrl = uploadResult.secure_url;
     }
-    return this.usersService.updateUserInfo({
-      ...data,
-      enabled2MFA: Boolean(data.enabled2MFA),
-      picture: cloudinaryFileUrl,
-    });
+    return this.usersService.updateUserInfo(
+      {
+        ...data,
+        enabled2MFA: Boolean(data.enabled2MFA),
+        picture: cloudinaryFileUrl,
+      },
+      keycloakId,
+    );
   }
 
-  @Put(COMMON_API_URL.USER_MANAGEMENT.DEACTIVATE_OR_ACTIVATE_ACCOUNT)
+  @Put(COMMON_API_URL.USER_MANAGEMENT.DEACTIVATE_ACCOUNT)
   async deactivateAccount(
-    @Body() data: { keycloakId: string; deactivateUser: boolean },
+    @Query('keycloakId') keycloakId: string,
+    @Query('deactivateUser') deactivateUser: boolean,
   ) {
-    return this.usersService.deactivateOrDisabledUser(data);
+    return this.usersService.deactivateOrDisabledUser(
+      keycloakId,
+      deactivateUser,
+    );
   }
 
   @Post(COMMON_API_URL.USER_MANAGEMENT.CLEAR_ALL_SESSIONS)

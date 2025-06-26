@@ -23,10 +23,6 @@ export class UpdateKeycloakUserDto {
   email?: string;
 
   @IsOptional()
-  @IsUUID()
-  keycloakId: string;
-
-  @IsOptional()
   @IsBoolean()
   enabled2MFA?: boolean;
 
