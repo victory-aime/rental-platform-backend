@@ -31,10 +31,25 @@ model User {
   carBookings  BookingCar[]
   roomBookings BookingRoom[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  otpPolicy OtpPolicy?
 
   @@index([keycloakId, email, etablissementId])
+}
+
+model OtpPolicy {
+  id           String    @id @default(uuid())
+  userId       String    @unique
+  secret       String    @unique
+  attemptCount Int       @default(0)
+  isBlocked    Boolean   @default(false)
+  blockUntil   DateTime?
+  limit        Int       @default(3)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Establishment {

@@ -15,11 +15,14 @@ export class UsersService {
     private readonly keycloakService: KeycloakService,
   ) {}
 
-  async findUserById(keycloakId: string): Promise<{
+  async findUser(
+    keycloakId: string,
+    email?: string,
+  ): Promise<{
     user: User | null;
   }> {
     const user = await this.prisma.user.findUnique({
-      where: { keycloakId },
+      where: { keycloakId, email },
     });
 
     if (!user) {
@@ -71,7 +74,7 @@ export class UsersService {
   ): Promise<{ message: string }> {
     try {
       return await this.prisma.$transaction(async (prisma) => {
-        const { user } = await this.findUserById(keycloakId);
+        const { user } = await this.findUser(keycloakId);
         if (!user) {
           throw new NotFoundException('Utilisateur introuvable');
         }
@@ -103,7 +106,7 @@ export class UsersService {
             firstName: data?.firstName,
             lastName: data?.name,
             password: data?.newPassword,
-            enabled2MFA: shouldUpdate2MFA ? true : undefined,
+            enabled2MFA: shouldUpdate2MFA ? false : undefined,
           }).filter(([_, value]) => value !== undefined),
         );
 
@@ -124,9 +127,9 @@ export class UsersService {
     }
   }
 
-  async deactivateOrDisabledUser(keycloakId: string, deactivateUser: boolean) {
+  async deactivate(keycloakId: string, deactivateUser: boolean) {
     try {
-      const { user } = await this.findUserById(keycloakId);
+      const { user } = await this.findUser(keycloakId);
       if (!user) {
         throw new NotFoundException('Utilisateur introuvable');
       }
@@ -153,11 +156,29 @@ export class UsersService {
 
   async clearAllSessions(keycloakId: string): Promise<void> {
     try {
-      const { user } = await this.findUserById(keycloakId);
+      const { user } = await this.findUser(keycloakId);
       if (!user) {
         throw new NotFoundException('Utilisateur introuvable');
       }
       await this.keycloakService.closeAllSessions(keycloakId);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException('Service indisponible pour le moment');
+    }
+  }
+
+  async activateUser(email: string): Promise<{ message: string }> {
+    try {
+      const { user } = await this.findUser('', email);
+      if (!user) {
+        throw new NotFoundException('Utilisateur introuvable');
+      }
+
+      await this.keycloakService.deactivateOrEnabledUser(
+        user?.keycloakId ?? '',
+        true,
+      );
+      return { message: 'Compte activé avec succès' };
     } catch (error) {
       console.error(error);
       throw new BadRequestException('Service indisponible pour le moment');

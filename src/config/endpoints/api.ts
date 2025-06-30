@@ -25,11 +25,11 @@ export const CARS_MODULES_APIS_URL = {
 
 export const COMMON_API_URL = {
   USER_MANAGEMENT: {
-    GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/user`,
     USER_INFO: `${BASE_APIS_URL.SECURED}/user/me`,
     USER_UPDATE: `${BASE_APIS_URL.SECURED}/user/update-user`,
     DEACTIVATE_ACCOUNT: `${BASE_APIS_URL.SECURED}/user/deactivate-account`,
     CLEAR_ALL_SESSIONS: `${BASE_APIS_URL.SECURED}/user/clear-all-sessions`,
+    ACTIVATE_ACCOUNT: `${BASE_APIS_URL.UNSECURED}/user/clear-all-sessions`,
   },
   CATEGORIES: {
     GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/categories`,
@@ -38,5 +38,11 @@ export const COMMON_API_URL = {
   EQUIPMENTS: {
     GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/equipments`,
     ADD: 'create-equipment',
+  },
+  OTP: {
+    GLOBAL_ROUTES: `${BASE_APIS_URL.UNSECURED}/otp`,
+    GENERATE: 'generate',
+    RENEW: 'renewOtp',
+    VALIDATE: 'validate',
   },
 };

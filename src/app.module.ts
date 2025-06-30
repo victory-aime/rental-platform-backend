@@ -5,9 +5,9 @@ import {
   WinstonModule,
 } from 'nest-winston';
 import { KeycloakModule } from './modules/keycloak/keycloak.module';
-import { UsersModule } from './modules/common/users';
 import { CarModules } from './modules/cars-agency/cars.module';
 import { ConfigModule } from '@nestjs/config';
+import { CommonModule } from '_common/common.module';
 
 @Module({
   imports: [
@@ -31,7 +31,7 @@ import { ConfigModule } from '@nestjs/config';
         }),
       ],
     }),
-    UsersModule,
+    CommonModule,
     KeycloakModule,
     CarModules,
   ],

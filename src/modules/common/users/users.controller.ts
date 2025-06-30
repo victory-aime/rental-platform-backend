@@ -58,15 +58,16 @@ export class UsersController {
     @Query('keycloakId') keycloakId: string,
     @Query('deactivateUser') deactivateUser: boolean,
   ) {
-    return this.usersService.deactivateOrDisabledUser(
-      keycloakId,
-      deactivateUser,
-    );
+    return this.usersService.deactivate(keycloakId, deactivateUser);
   }
 
   @Post(COMMON_API_URL.USER_MANAGEMENT.CLEAR_ALL_SESSIONS)
   async clearSessions(@Query('keycloakId') keycloakId: string) {
-    console.log('keycloakId', keycloakId);
     return this.usersService.clearAllSessions(keycloakId);
+  }
+
+  @Post(COMMON_API_URL.USER_MANAGEMENT.ACTIVATE_ACCOUNT)
+  async activeAccount(@Query('email') email: string) {
+    return this.usersService.activateUser(email);
   }
 }
