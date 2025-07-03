@@ -46,7 +46,9 @@ export class UsersController {
     return this.usersService.updateUserInfo(
       {
         ...data,
-        enabled2MFA: Boolean(data.enabled2MFA),
+        enabled2MFA: typeof data?.enabled2MFA === 'string'
+          ? data.enabled2MFA === 'true'
+          : !!data?.enabled2MFA,
         picture: cloudinaryFileUrl,
       },
       keycloakId,
@@ -67,7 +69,8 @@ export class UsersController {
   }
 
   @Post(COMMON_API_URL.USER_MANAGEMENT.ACTIVATE_ACCOUNT)
-  async activeAccount(@Query('email') email: string) {
-    return this.usersService.activateUser(email);
+  async activeAccount(@Body() payload: { email: string }) {
+    console.log('payload activate', payload?.email);
+    return this.usersService.activateUser(payload?.email);
   }
 }

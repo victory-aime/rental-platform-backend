@@ -34,20 +34,32 @@ model User {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   otpPolicy OtpPolicy?
+  OtpCode   OtpCode[]
 
   @@index([keycloakId, email, etablissementId])
 }
 
 model OtpPolicy {
-  id           String    @id @default(uuid())
-  userId       String    @unique
-  secret       String    @unique
-  attemptCount Int       @default(0)
-  isBlocked    Boolean   @default(false)
-  blockUntil   DateTime?
-  limit        Int       @default(3)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  otpRequestCount Int       @default(0)
+  isBlocked       Boolean   @default(false)
+  blockUntil      DateTime?
+  limit           Int       @default(3)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  userId    String
+  code      String
+  secret    String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 }

@@ -29,7 +29,7 @@ export const COMMON_API_URL = {
     USER_UPDATE: `${BASE_APIS_URL.SECURED}/user/update-user`,
     DEACTIVATE_ACCOUNT: `${BASE_APIS_URL.SECURED}/user/deactivate-account`,
     CLEAR_ALL_SESSIONS: `${BASE_APIS_URL.SECURED}/user/clear-all-sessions`,
-    ACTIVATE_ACCOUNT: `${BASE_APIS_URL.UNSECURED}/user/clear-all-sessions`,
+    ACTIVATE_ACCOUNT: `${BASE_APIS_URL.SECURED}/user/activate-account`,
   },
   CATEGORIES: {
     GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/categories`,

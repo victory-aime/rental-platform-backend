@@ -16,18 +16,24 @@ export class UsersService {
   ) {}
 
   async findUser(
-    keycloakId: string,
+    keycloakId?: string,
     email?: string,
   ): Promise<{
     user: User | null;
   }> {
-    const user = await this.prisma.user.findUnique({
-      where: { keycloakId, email },
-    });
-
-    if (!user) {
+    if (!keycloakId && !email) {
       return { user: null };
     }
+
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          ...(email ? [{ email }] : []),
+          ...(keycloakId ? [{ keycloakId }] : []),
+        ],
+      },
+    });
+
     return { user };
   }
 
@@ -95,27 +101,27 @@ export class UsersService {
           data: userUpdateData,
         });
 
-        const shouldUpdate2MFA =
-          typeof data?.enabled2MFA === 'boolean' &&
-          data.enabled2MFA &&
-          user.enabled2MFA === false;
+        // const shouldUpdate2MFA =
+        //   typeof data?.enabled2MFA === 'boolean' &&
+        //   data.enabled2MFA &&
+        //   user.enabled2MFA === false;
 
-        const keycloakPayload = Object.fromEntries(
-          Object.entries({
-            email: data?.email,
-            firstName: data?.firstName,
-            lastName: data?.name,
-            password: data?.newPassword,
-            enabled2MFA: shouldUpdate2MFA ? false : undefined,
-          }).filter(([_, value]) => value !== undefined),
-        );
+        // const keycloakPayload = Object.fromEntries(
+        //   Object.entries({
+        //     email: data?.email,
+        //     firstName: data?.firstName,
+        //     lastName: data?.name,
+        //     password: data?.newPassword,
+        //     enabled2MFA: shouldUpdate2MFA ? false : undefined,
+        //   }).filter(([_, value]) => value !== undefined),
+        // );
 
-        if (Object.keys(keycloakPayload).length > 0) {
-          await this.keycloakService.updateUserProfile(
-            keycloakId,
-            keycloakPayload,
-          );
-        }
+        // if (Object.keys(keycloakPayload).length > 0) {
+        //   await this.keycloakService.updateUserProfile(
+        //     keycloakId,
+        //     keycloakPayload,
+        //   );
+        // }
 
         return {
           message: 'Compte mis à jour avec succès',
