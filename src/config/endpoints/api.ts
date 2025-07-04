@@ -30,6 +30,13 @@ export const COMMON_API_URL = {
     DEACTIVATE_ACCOUNT: `${BASE_APIS_URL.SECURED}/user/deactivate-account`,
     CLEAR_ALL_SESSIONS: `${BASE_APIS_URL.SECURED}/user/clear-all-sessions`,
     ACTIVATE_ACCOUNT: `${BASE_APIS_URL.SECURED}/user/activate-account`,
+    REGISTER_PASSKEY: `${BASE_APIS_URL.SECURED}/user/create-passkey`,
+    REVOKE_PASSKEY: `${BASE_APIS_URL.SECURED}/user/revoke-passkey`,
+    CREDENTIALS_LIST: `${BASE_APIS_URL.SECURED}/user/credentials-list`,
+        MY_SESSIONS: `${BASE_APIS_URL.SECURED}/user/sessions`,
+        REVOKE_SESSIONS: `${BASE_APIS_URL.SECURED}/user/sessions-delete`,
+
+
   },
   CATEGORIES: {
     GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/categories`,

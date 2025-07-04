@@ -49,7 +49,7 @@ export class OtpService {
     email: string;
     message: string;
   }> {
-    const { user } = await this.userService.findUser('', email);
+    const { user } = await this.userService.findUser(undefined, email);
     if (!user) throw new NotFoundException('Utilisateur introuvable');
 
     const policy = await this.prisma.otpPolicy.findUnique({
@@ -120,7 +120,7 @@ export class OtpService {
   }
 
   async validateOtp(email: string, otp: string): Promise<{ message: string }> {
-    const { user } = await this.userService.findUser('', email);
+    const { user } = await this.userService.findUser(undefined, email);
     if (!user) throw new NotFoundException('Utilisateur introuvable');
 
     const latestOtp = await this.prisma.otpCode.findFirst({

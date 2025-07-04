@@ -9,12 +9,7 @@ import { AgencyServices } from '_common/agency/agency.service';
 @Module({
   imports: [CloudinaryModule],
   controllers: [ManageCarsController],
-  providers: [
-    ManageCarService,
-    AgencyServices,
-    PrismaService,
-    UploadsService,
-  ],
+  providers: [ManageCarService, AgencyServices, PrismaService, UploadsService],
   exports: [ManageCarService],
 })
 export class ManageCarModule {}

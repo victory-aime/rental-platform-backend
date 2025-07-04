@@ -14,7 +14,6 @@ export class OtpController {
 
   @Post(COMMON_API_URL.OTP.VALIDATE)
   async verifyOTP(@Body() data: { email: string; otp: string }) {
-    console.log('values', data);
     return await this.otpService.validateOtp(data.email, data.otp);
   }
 }

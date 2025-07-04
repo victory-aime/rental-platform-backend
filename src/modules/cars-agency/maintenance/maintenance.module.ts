@@ -6,11 +6,7 @@ import { MaintenanceController } from './maintenance.controller';
 
 @Module({
   controllers: [MaintenanceController],
-  providers: [
-    PrismaService,
-    MaintenanceService,
-    AgencyServices,
-  ],
+  providers: [PrismaService, MaintenanceService, AgencyServices],
   exports: [MaintenanceService],
 })
 export class MaintenanceModule {}

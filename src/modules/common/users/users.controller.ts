@@ -46,9 +46,10 @@ export class UsersController {
     return this.usersService.updateUserInfo(
       {
         ...data,
-        enabled2MFA: typeof data?.enabled2MFA === 'string'
-          ? data.enabled2MFA === 'true'
-          : !!data?.enabled2MFA,
+        enabled2MFA:
+          typeof data?.enabled2MFA === 'string'
+            ? data.enabled2MFA === 'true'
+            : !!data?.enabled2MFA,
         picture: cloudinaryFileUrl,
       },
       keycloakId,
@@ -60,6 +61,7 @@ export class UsersController {
     @Query('keycloakId') keycloakId: string,
     @Query('deactivateUser') deactivateUser: boolean,
   ) {
+    console.log('values', keycloakId, deactivateUser)
     return this.usersService.deactivate(keycloakId, deactivateUser);
   }
 
@@ -70,7 +72,32 @@ export class UsersController {
 
   @Post(COMMON_API_URL.USER_MANAGEMENT.ACTIVATE_ACCOUNT)
   async activeAccount(@Body() payload: { email: string }) {
-    console.log('payload activate', payload?.email);
     return this.usersService.activateUser(payload?.email);
+  }
+
+  @Post(COMMON_API_URL.USER_MANAGEMENT.REGISTER_PASSKEY)
+  async registerPasskey(@Query('keycloakId') keycloakId: string) {
+    return this.usersService.createPasskey(keycloakId);
+  }
+  
+  @Post(COMMON_API_URL.USER_MANAGEMENT.REVOKE_PASSKEY)
+  async revokeCredential(
+    @Query('keycloakId') keycloakId: string,
+    @Query('credentialId') credentialId: string,
+  ) {
+    return this.usersService.revokeUserCredentials(keycloakId, credentialId);
+  }
+  @Get(COMMON_API_URL.USER_MANAGEMENT.CREDENTIALS_LIST)
+  async crendentialList(@Query('keycloakId') keycloakId: string) {
+    return this.usersService.getUserCredentials(keycloakId);
+  }
+
+  @Get(COMMON_API_URL.USER_MANAGEMENT.MY_SESSIONS)
+  async sessions(@Query('keycloakId') keycloakId: string) {
+    return this.usersService.getUserSessions(keycloakId);
+  }
+  @Post(COMMON_API_URL.USER_MANAGEMENT.REVOKE_SESSIONS)
+  async revokeSessions(@Query('keycloakId') keycloakId: string) {
+    return this.usersService.revokeSessions(keycloakId);
   }
 }

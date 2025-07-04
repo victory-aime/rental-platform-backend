@@ -26,12 +26,7 @@ export class UsersService {
     }
 
     const user = await this.prisma.user.findFirst({
-      where: {
-        OR: [
-          ...(email ? [{ email }] : []),
-          ...(keycloakId ? [{ keycloakId }] : []),
-        ],
-      },
+      where: email ? { email } : { keycloakId },
     });
 
     return { user };
@@ -100,29 +95,6 @@ export class UsersService {
           where: { id: user.id },
           data: userUpdateData,
         });
-
-        // const shouldUpdate2MFA =
-        //   typeof data?.enabled2MFA === 'boolean' &&
-        //   data.enabled2MFA &&
-        //   user.enabled2MFA === false;
-
-        // const keycloakPayload = Object.fromEntries(
-        //   Object.entries({
-        //     email: data?.email,
-        //     firstName: data?.firstName,
-        //     lastName: data?.name,
-        //     password: data?.newPassword,
-        //     enabled2MFA: shouldUpdate2MFA ? false : undefined,
-        //   }).filter(([_, value]) => value !== undefined),
-        // );
-
-        // if (Object.keys(keycloakPayload).length > 0) {
-        //   await this.keycloakService.updateUserProfile(
-        //     keycloakId,
-        //     keycloakPayload,
-        //   );
-        // }
-
         return {
           message: 'Compte mis à jour avec succès',
         };
@@ -140,19 +112,15 @@ export class UsersService {
         throw new NotFoundException('Utilisateur introuvable');
       }
 
-      if (deactivateUser) {
-        await this.keycloakService.deactivateOrEnabledUser(
-          keycloakId,
-          deactivateUser,
-        );
-      } else {
-        await this.keycloakService.deactivateOrEnabledUser(
-          keycloakId,
-          deactivateUser,
-        );
-      }
+      console.log('keycloakId', keycloakId, 'value', deactivateUser)
+
+      await this.keycloakService.deactivateOrEnabledUser(
+        keycloakId,
+        deactivateUser,
+      );
+
       return {
-        message: `Compte ${deactivateUser ? 'supprimer' : 'activé'} avec succès`,
+        message: 'Compte supprimer',
       };
     } catch (e) {
       console.error(e);
@@ -175,7 +143,7 @@ export class UsersService {
 
   async activateUser(email: string): Promise<{ message: string }> {
     try {
-      const { user } = await this.findUser('', email);
+      const { user } = await this.findUser(undefined, email);
       if (!user) {
         throw new NotFoundException('Utilisateur introuvable');
       }
@@ -185,6 +153,69 @@ export class UsersService {
         true,
       );
       return { message: 'Compte activé avec succès' };
+    } catch (error) {
+      throw new BadRequestException(
+        'Le service est indisponible pour le moment.',
+      );
+    }
+  }
+  async createPasskey(keycloakId: string) {
+    try {
+      const { user } = await this.findUser(keycloakId);
+      if (!user) {
+        throw new NotFoundException('Utilisateur introuvable');
+      }
+      await this.keycloakService.triggerPasskeyRegistration(keycloakId);
+      return { message: 'Operation ajoute avec success' };
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException('Service indisponible pour le moment');
+    }
+  }
+  async getUserCredentials(keycloakId: string) {
+    try {
+      const { user } = await this.findUser(keycloakId);
+      if (!user) {
+        throw new NotFoundException('Utilisateur introuvable');
+      }
+      const data = await this.keycloakService.listUserCredentials(keycloakId);
+      return { message: 'Operation reussie avec success', data };
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException('Service indisponible pour le moment');
+    }
+  }
+
+  async revokeUserCredentials(keycloakId: string, credentialId: string) {
+    try {
+      const { user } = await this.findUser(keycloakId);
+      if (!user) {
+        throw new NotFoundException('Utilisateur introuvable');
+      }
+      await this.keycloakService.deleteUserCredential(keycloakId, credentialId);
+      return { message: 'Operation reussie avec success' };
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException('Service indisponible pour le moment');
+    }
+  }
+  async revokeSessions(sessionId: string) {
+    try {
+      await this.keycloakService.revokeSession(sessionId);
+      return { message: 'Operation reussie avec success' };
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException('Service indisponible pour le moment');
+    }
+  }
+  async getUserSessions(keycloakId: string) {
+    try {
+      const { user } = await this.findUser(keycloakId);
+      if (!user) {
+        throw new NotFoundException('Utilisateur introuvable');
+      }
+      const sessions = await this.keycloakService.listUserSessions(keycloakId);
+      return { message: 'Operation reussie avec success', sessions };
     } catch (error) {
       console.error(error);
       throw new BadRequestException('Service indisponible pour le moment');

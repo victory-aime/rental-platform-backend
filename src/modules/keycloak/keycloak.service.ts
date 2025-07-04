@@ -6,6 +6,9 @@ import { keycloakUserDto } from './keycloak.dto';
 @Injectable()
 export class KeycloakService {
   private readonly issuer = process.env.KEYCLOAK_ISSUER!;
+  private readonly baseUrl =
+    'http://localhost:8080/admin/realms/rental-platform';
+
   private readonly adminTokenUrl = process.env.KEYCLOAK_ADMIN_TOKEN_URL!;
   private readonly clientId = process.env.KEYCLOAK_MASTER_CLIENT_ID!;
   private readonly clientSecret = process.env.KEYCLOAK_MASTER_CLIENT_SECRET!;
@@ -42,19 +45,13 @@ export class KeycloakService {
         'Content-Type': 'application/json',
       };
 
-      const { enabled2MFA, password, ...userFields } = values;
+      const { password, ...userFields } = values;
 
-      // Préparation du payload utilisateur (profil)
       const userPayload: Record<string, any> = {
         ...Object.fromEntries(
           Object.entries(userFields).filter(([_, v]) => v !== undefined),
         ),
       };
-
-      // Ajout de l'action MFA si nécessaire
-      if (enabled2MFA === true) {
-        userPayload.requiredActions = ['CONFIGURE_TOTP'];
-      }
 
       // Envoi de la mise à jour du profil si au moins une info est présente
       if (Object.keys(userPayload).length > 0) {
@@ -130,4 +127,70 @@ export class KeycloakService {
       throw new BadRequestException('Échec de la fermeture des sessions');
     }
   }
+
+  // 1. Ajouter requiredAction pour créer une passkey
+  async triggerPasskeyRegistration(keycloakId: string): Promise<void> {
+    const headers = await this.getAuthHeaders();
+
+    // Récupérer utilisateur pour ne pas écraser les actions existantes
+    const userResp = await axios.get(`${this.baseUrl}/users/${keycloakId}`, {
+      headers,
+    });
+    const existingActions: string[] = userResp.data.requiredActions || [];
+
+
+    if (!existingActions.includes('webauthn-register-passwordless')) {
+      existingActions.push('webauthn-register-passwordless');
+    }
+
+    await axios.put(
+      `${this.baseUrl}/users/${keycloakId}`,
+      { requiredActions: existingActions },
+      { headers },
+    );
+  }
+
+  // 2. Lister tous les credentials utilisateur
+  async listUserCredentials(keycloakId: string): Promise<any[]> {
+    const headers = await this.getAuthHeaders();
+    const response = await axios.get(
+      `${this.baseUrl}/users/${keycloakId}/credentials`,
+      { headers },
+    );
+    return response.data;
+  }
+
+  // 3. Supprimer un credential par son ID
+  async deleteUserCredential(
+    keycloakId: string,
+    credentialId: string,
+  ): Promise<void> {
+    const headers = await this.getAuthHeaders();
+    try {
+      await axios.delete(
+        `${this.baseUrl}/users/${keycloakId}/credentials/${credentialId}`,
+        { headers },
+      );
+    } catch (error) {
+      throw new BadRequestException('Impossible de supprimer la clé');
+    }
+  }
+
+  async listUserSessions(keycloakId: string) {
+  const headers = await this.getAuthHeaders();
+  const response = await axios.get(
+    `${this.baseUrl}/users/${keycloakId}/sessions`,
+    { headers },
+  );
+  return response.data;
+}
+async revokeSession(sessionId: string) {
+  const headers = await this.getAuthHeaders();
+  await axios.delete(
+    `${this.baseUrl}/sessions/${sessionId}`,
+    { headers },
+  );
+}
+
+
 }

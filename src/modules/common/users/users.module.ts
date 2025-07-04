@@ -7,7 +7,7 @@ import { CloudinaryModule } from '_common/cloudinary/cloudinary.module';
 import { UploadsService } from '_common/uploads/uploads.service';
 
 @Module({
- imports: [KeycloakModule, CloudinaryModule],
+  imports: [KeycloakModule, CloudinaryModule],
   providers: [UsersService, PrismaService, UploadsService],
   controllers: [UsersController],
   exports: [UsersService],
