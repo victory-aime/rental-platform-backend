@@ -5,7 +5,6 @@ import { keycloakUserDto } from './keycloak.dto';
 
 @Injectable()
 export class KeycloakService {
-  private readonly issuer = process.env.KEYCLOAK_ISSUER!;
   private readonly baseUrl =
     'http://localhost:8080/admin/realms/rental-platform';
 
@@ -47,17 +46,11 @@ export class KeycloakService {
 
       const { password, ...userFields } = values;
 
-      const userPayload: Record<string, any> = {
-        ...Object.fromEntries(
-          Object.entries(userFields).filter(([_, v]) => v !== undefined),
-        ),
-      };
-
       // Envoi de la mise à jour du profil si au moins une info est présente
-      if (Object.keys(userPayload).length > 0) {
+      if (Object.keys(userFields).length > 0) {
         await axios.put(
           `http://localhost:8080/admin/realms/rental-platform/users/${keycloakId}`,
-          userPayload,
+          userFields,
           { headers },
         );
       }
@@ -138,7 +131,6 @@ export class KeycloakService {
     });
     const existingActions: string[] = userResp.data.requiredActions || [];
 
-
     if (!existingActions.includes('webauthn-register-passwordless')) {
       existingActions.push('webauthn-register-passwordless');
     }
@@ -151,7 +143,9 @@ export class KeycloakService {
   }
 
   // 2. Lister tous les credentials utilisateur
-  async listUserCredentials(keycloakId: string): Promise<any[]> {
+  async listUserCredentials(
+    keycloakId: string,
+  ): Promise<{ id: string; userLabel: string; createdDate: string }[]> {
     const headers = await this.getAuthHeaders();
     const response = await axios.get(
       `${this.baseUrl}/users/${keycloakId}/credentials`,
@@ -171,26 +165,21 @@ export class KeycloakService {
         `${this.baseUrl}/users/${keycloakId}/credentials/${credentialId}`,
         { headers },
       );
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Impossible de supprimer la clé');
     }
   }
 
   async listUserSessions(keycloakId: string) {
-  const headers = await this.getAuthHeaders();
-  const response = await axios.get(
-    `${this.baseUrl}/users/${keycloakId}/sessions`,
-    { headers },
-  );
-  return response.data;
-}
-async revokeSession(sessionId: string) {
-  const headers = await this.getAuthHeaders();
-  await axios.delete(
-    `${this.baseUrl}/sessions/${sessionId}`,
-    { headers },
-  );
-}
-
-
+    const headers = await this.getAuthHeaders();
+    const response = await axios.get(
+      `${this.baseUrl}/users/${keycloakId}/sessions`,
+      { headers },
+    );
+    return response.data;
+  }
+  async revokeSession(sessionId: string) {
+    const headers = await this.getAuthHeaders();
+    await axios.delete(`${this.baseUrl}/sessions/${sessionId}`, { headers });
+  }
 }

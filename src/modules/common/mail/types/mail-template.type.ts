@@ -13,7 +13,6 @@ export class EmailTemplatePayload {
   message?: string;
   attachments?: Attachment[];
   type?: EmailTemplateType;
-  [key: string]: any;
 }
 
 class Attachment {

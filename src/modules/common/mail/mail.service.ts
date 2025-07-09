@@ -14,7 +14,10 @@ export class EmailService {
     private readonly compileTemplate: CompileTemplateService,
   ) {}
 
-  async sendEmail(emailDto: EmailTemplatePayload, context: any): Promise<void> {
+  async sendEmail(
+    emailDto: EmailTemplatePayload,
+    context: Record<string, string>,
+  ): Promise<void> {
     const { recipients, subject = 'Validate OTP' } = emailDto;
     const html = this.compileTemplate.compileTemplate('otp', context);
     try {

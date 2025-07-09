@@ -63,8 +63,7 @@ export class UsersService {
             }
           : null,
       };
-    } catch (error) {
-      console.error(error);
+    } catch {
       throw new BadRequestException('Service indisponible pour le moment');
     }
   }
@@ -88,8 +87,14 @@ export class UsersService {
             enabled2MFA: data?.enabled2MFA,
             preferredLanguage: data?.preferredLanguage,
             picture: data?.picture,
-          }).filter(([_, value]) => value !== undefined && value !== ''),
+          }).filter(
+            ([_, value]) =>
+              value !== undefined && value !== null && value !== '',
+          ),
         );
+        if (Object.keys(userUpdateData).length === 0) {
+          throw new BadRequestException('Aucune donnée valide à mettre à jour');
+        }
 
         await prisma.user.update({
           where: { id: user.id },
@@ -99,8 +104,7 @@ export class UsersService {
           message: 'Compte mis à jour avec succès',
         };
       });
-    } catch (error) {
-      console.error(error);
+    } catch {
       throw new BadRequestException('Service indisponible pour le moment');
     }
   }
@@ -112,7 +116,7 @@ export class UsersService {
         throw new NotFoundException('Utilisateur introuvable');
       }
 
-      console.log('keycloakId', keycloakId, 'value', deactivateUser)
+      console.log('keycloakId', keycloakId, 'value', deactivateUser);
 
       await this.keycloakService.deactivateOrEnabledUser(
         keycloakId,
@@ -122,8 +126,7 @@ export class UsersService {
       return {
         message: 'Compte supprimer',
       };
-    } catch (e) {
-      console.error(e);
+    } catch {
       throw new BadRequestException('Service indisponible pour le moment');
     }
   }
@@ -135,8 +138,7 @@ export class UsersService {
         throw new NotFoundException('Utilisateur introuvable');
       }
       await this.keycloakService.closeAllSessions(keycloakId);
-    } catch (error) {
-      console.error(error);
+    } catch {
       throw new BadRequestException('Service indisponible pour le moment');
     }
   }
@@ -153,7 +155,7 @@ export class UsersService {
         true,
       );
       return { message: 'Compte activé avec succès' };
-    } catch (error) {
+    } catch {
       throw new BadRequestException(
         'Le service est indisponible pour le moment.',
       );
@@ -167,8 +169,7 @@ export class UsersService {
       }
       await this.keycloakService.triggerPasskeyRegistration(keycloakId);
       return { message: 'Operation ajoute avec success' };
-    } catch (error) {
-      console.error(error);
+    } catch {
       throw new BadRequestException('Service indisponible pour le moment');
     }
   }
@@ -180,8 +181,7 @@ export class UsersService {
       }
       const data = await this.keycloakService.listUserCredentials(keycloakId);
       return { message: 'Operation reussie avec success', data };
-    } catch (error) {
-      console.error(error);
+    } catch {
       throw new BadRequestException('Service indisponible pour le moment');
     }
   }
@@ -194,8 +194,7 @@ export class UsersService {
       }
       await this.keycloakService.deleteUserCredential(keycloakId, credentialId);
       return { message: 'Operation reussie avec success' };
-    } catch (error) {
-      console.error(error);
+    } catch {
       throw new BadRequestException('Service indisponible pour le moment');
     }
   }
@@ -203,8 +202,7 @@ export class UsersService {
     try {
       await this.keycloakService.revokeSession(sessionId);
       return { message: 'Operation reussie avec success' };
-    } catch (error) {
-      console.error(error);
+    } catch {
       throw new BadRequestException('Service indisponible pour le moment');
     }
   }
@@ -216,8 +214,7 @@ export class UsersService {
       }
       const sessions = await this.keycloakService.listUserSessions(keycloakId);
       return { message: 'Operation reussie avec success', sessions };
-    } catch (error) {
-      console.error(error);
+    } catch {
       throw new BadRequestException('Service indisponible pour le moment');
     }
   }

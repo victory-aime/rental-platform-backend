@@ -53,7 +53,7 @@ export class MaintenanceService {
       }));
 
       return data;
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Error');
     }
   }

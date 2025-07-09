@@ -35,9 +35,9 @@ export class KeycloakRolesGuard implements CanActivate {
     const token = authHeader.split(' ')[1];
 
     try {
-      const decodedToken = decode(token, { complete: true }) as {
-        header: any;
-        payload: JwtPayload;
+      const decodedToken = decode(token, { complete: true }) as unknown as {
+        header: Record<string, unknown>;
+        payload: Record<string, unknown>;
       };
       if (!decodedToken) {
         throw new ForbiddenException('Token invalide');
@@ -58,8 +58,7 @@ export class KeycloakRolesGuard implements CanActivate {
       }
 
       return true;
-    } catch (error) {
-      console.error('Erreur de validation du token Keycloak:', error);
+    } catch {
       throw new UnauthorizedException('Erreur de validation du token Keycloak');
     }
   }

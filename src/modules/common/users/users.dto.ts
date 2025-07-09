@@ -3,7 +3,6 @@ import {
   IsEmail,
   IsOptional,
   IsString,
-  IsUUID,
   Length,
 } from 'class-validator';
 

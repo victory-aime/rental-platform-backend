@@ -5,7 +5,7 @@ import * as path from 'path';
 
 @Injectable()
 export class CompileTemplateService {
-  compileTemplate(templatePath: string, context: Record<string, any>) {
+  compileTemplate(templatePath: string, context: Record<string, string>) {
     const fullPath = path.resolve(
       './src/modules/common/mail/templates/',
       templatePath + '.hbs',

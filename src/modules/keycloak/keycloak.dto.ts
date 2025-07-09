@@ -3,5 +3,4 @@ export class keycloakUserDto {
   lastName?: string;
   email?: string;
   password?: string;
-  enabled2MFA?: boolean;
 }

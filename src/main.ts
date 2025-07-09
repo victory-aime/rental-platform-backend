@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import * as figlet from 'figlet';
 import * as bodyParser from 'body-parser';
 import { LoadEnvironmentVariables } from '_config/utils/env';
-import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   LoadEnvironmentVariables();
