@@ -38,11 +38,19 @@ export class UsersController {
     @Query('keycloakId') keycloakId: string,
     @UploadedFiles() file: Express.Multer.File,
   ) {
-    let cloudinaryFileUrl: string = '';
-    if (file) {
-      const uploadResult = await this.uploadFiles.uploadUsersImage(file[0]);
+    let cloudinaryFileUrl: string | null = null;
+    if (file?.[0]) {
+      const uploadResult = await this.uploadFiles.uploadUsersImage(
+        file[0],
+        keycloakId,
+      );
       cloudinaryFileUrl = uploadResult.secure_url;
     }
+    if (data?.picture === '') {
+      await this.uploadFiles.deleteUsersImage(keycloakId);
+      cloudinaryFileUrl = null;
+    }
+
     return this.usersService.updateUserInfo(
       {
         ...data,
@@ -61,7 +69,7 @@ export class UsersController {
     @Query('keycloakId') keycloakId: string,
     @Query('deactivateUser') deactivateUser: boolean,
   ) {
-    console.log('values', keycloakId, deactivateUser)
+    console.log('values', keycloakId, deactivateUser);
     return this.usersService.deactivate(keycloakId, deactivateUser);
   }
 
@@ -79,7 +87,7 @@ export class UsersController {
   async registerPasskey(@Query('keycloakId') keycloakId: string) {
     return this.usersService.createPasskey(keycloakId);
   }
-  
+
   @Post(COMMON_API_URL.USER_MANAGEMENT.REVOKE_PASSKEY)
   async revokeCredential(
     @Query('keycloakId') keycloakId: string,

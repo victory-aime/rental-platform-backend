@@ -31,7 +31,7 @@ export class UpdateKeycloakUserDto {
 
   @IsOptional()
   @IsString()
-  picture?: string;
+  picture?: string | null;
 
   @IsOptional()
   @IsString()

@@ -6,6 +6,8 @@ export const CARS_MODULES_APIS_URL = {
     ADD_CAR: `add`,
     UPDATE_CAR: 'update-car',
     GET_CARS: 'cars-list',
+    DELETE_CAR: 'delete-car',
+    DELETE_ALL_CARS: 'delete-all-cars',
   },
   PARC_MANAGEMENT: {
     GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/manage-parcs`,
@@ -33,10 +35,8 @@ export const COMMON_API_URL = {
     REGISTER_PASSKEY: `${BASE_APIS_URL.SECURED}/user/create-passkey`,
     REVOKE_PASSKEY: `${BASE_APIS_URL.SECURED}/user/revoke-passkey`,
     CREDENTIALS_LIST: `${BASE_APIS_URL.SECURED}/user/credentials-list`,
-        MY_SESSIONS: `${BASE_APIS_URL.SECURED}/user/sessions`,
-        REVOKE_SESSIONS: `${BASE_APIS_URL.SECURED}/user/sessions-delete`,
-
-
+    MY_SESSIONS: `${BASE_APIS_URL.SECURED}/user/sessions`,
+    REVOKE_SESSIONS: `${BASE_APIS_URL.SECURED}/user/sessions-delete`,
   },
   CATEGORIES: {
     GLOBAL_ROUTES: `${BASE_APIS_URL.SECURED}/categories`,

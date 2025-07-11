@@ -42,4 +42,29 @@ export class CloudinaryService {
       readable.pipe(stream);
     });
   }
+
+  async deleteFolder(folderPath: string): Promise<void> {
+    try {
+      // Supprime tous les fichiers
+      await cloudinary.api.delete_resources_by_prefix(folderPath);
+
+      // Supprime le dossier vide
+      await cloudinary.api.delete_folder(folderPath);
+    } catch (err) {
+      console.error(
+        'Erreur lors de la suppression de l’image Cloudinary :',
+        err,
+      );
+      throw err;
+    }
+  }
+
+  async deleteImage(publicId: string): Promise<void> {
+    try {
+      await cloudinary.uploader.destroy(publicId);
+    } catch (err) {
+      console.error(`Erreur suppression image Cloudinary : ${publicId}`, err);
+      throw err;
+    }
+  }
 }

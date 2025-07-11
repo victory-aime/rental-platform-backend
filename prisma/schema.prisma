@@ -115,7 +115,7 @@ model BookingRoom {
 model CarAgency {
   id              String           @id @default(uuid())
   establishmentId String           @unique
-  establishment   Establishment    @relation(fields: [establishmentId], references: [id])
+  establishment   Establishment    @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
   cars            Car[]
   parcs           ParkingCar[]
   maintenances    CarMaintenance[]
@@ -146,10 +146,10 @@ model Car {
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
 
-  agence      CarAgency    @relation(fields: [agenceId], references: [id])
   bookings    BookingCar[]
-  carCategory CarCategory? @relation(fields: [carCategoryId], references: [id])
-  parkingCar  ParkingCar?  @relation("CarsInParking", fields: [parkingCarId], references: [id])
+  agence      CarAgency    @relation(fields: [agenceId], references: [id], onDelete: Cascade)
+  carCategory CarCategory? @relation(fields: [carCategoryId], references: [id], onDelete: SetNull)
+  parkingCar  ParkingCar?  @relation("CarsInParking", fields: [parkingCarId], references: [id], onDelete: SetNull)
 }
 
 model CarCategory {
@@ -175,7 +175,7 @@ model ParkingCar {
   address   String
   agencyId  String?
   listCar   Car[]      @relation("CarsInParking")
-  carAgency CarAgency? @relation(fields: [agencyId], references: [id])
+  carAgency CarAgency? @relation(fields: [agencyId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
@@ -198,8 +198,8 @@ model CarMaintenance {
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
 
-  car       Car        @relation(fields: [carId], references: [id])
-  carAgency CarAgency? @relation(fields: [agencyId], references: [id])
+  car       Car        @relation(fields: [carId], references: [id], onDelete: Cascade)
+  carAgency CarAgency? @relation(fields: [agencyId], references: [id], onDelete: Cascade)
 
   @@index([agencyId, status, cost])
   @@index([carId, scheduledStartDate])
@@ -213,7 +213,7 @@ model BookingCar {
   endDate   DateTime
   status    BookingStatus @default(PENDING)
   user      User          @relation(fields: [userId], references: [id])
-  car       Car           @relation(fields: [carId], references: [id])
+  car       Car           @relation(fields: [carId], references: [id], onDelete: Cascade)
 }
 
 model SubscriptionPlan {

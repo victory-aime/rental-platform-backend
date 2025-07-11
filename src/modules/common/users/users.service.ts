@@ -86,11 +86,11 @@ export class UsersService {
             email: data?.email,
             enabled2MFA: data?.enabled2MFA,
             preferredLanguage: data?.preferredLanguage,
-            picture: data?.picture,
-          }).filter(
-            ([_, value]) =>
-              value !== undefined && value !== null && value !== '',
-          ),
+            picture: data?.picture === '' ? null : data?.picture,
+          }).filter(([key, value]) => {
+            if (key === 'picture') return true;
+            return value !== undefined && value !== null && value !== '';
+          }),
         );
         if (Object.keys(userUpdateData).length === 0) {
           throw new BadRequestException('Aucune donnée valide à mettre à jour');

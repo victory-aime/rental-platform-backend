@@ -1,0 +1,12 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "sync:platform",
+      "problemMatcher": [],
+      "label": "npm: sync:platform",
+      "detail": "dotenv -e .env.local -- cross-env NODE_ENV=local npx prisma db push"
+    }
+  ]
+}

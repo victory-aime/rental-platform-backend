@@ -73,5 +73,5 @@ export class CreateCarDto {
   @IsOptional()
   @IsArray()
   @IsUUID(undefined, { each: true })
-  equipmentIds?: string[];
+  equipmentIds?: string[] | string;
 }

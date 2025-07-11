@@ -7,6 +7,7 @@ import {
   UploadedFiles,
   UseInterceptors,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { CreateCarDto } from './manage-cars.dto';
 import { ManageCarService } from './manage-cars.service';
@@ -88,5 +89,15 @@ export class ManageCarsController {
       },
       requestId,
     );
+  }
+
+  @Delete(CARS_MODULES_APIS_URL.CARS_MANAGEMENT.DELETE_CAR)
+  async deleteCar(@Query('carId') carId: string) {
+    return this.carService.deleteCar(carId);
+  }
+
+  @Delete(CARS_MODULES_APIS_URL.CARS_MANAGEMENT.DELETE_ALL_CARS)
+  async deleteAllCars(@Query('agencyId') agencyId: string) {
+    return this.carService.deleteAllCars(agencyId);
   }
 }
