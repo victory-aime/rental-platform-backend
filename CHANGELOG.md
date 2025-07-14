@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/victory-aime/rental-platform-backend/compare/v1.0.0...v1.1.0) (2025-07-14)
+
+
+### Features
+
+* manage cars ([f3d7d37](https://github.com/victory-aime/rental-platform-backend/commit/f3d7d37493625a6639dda5509b3dd17a2b47d393))
+
 # 1.0.0 (2025-07-09)
 
 
