@@ -1,12 +1,15 @@
 export function extractPublicIdFromUrl(url: string): string | null {
   try {
-    const parts = url.split('/');
-    const fileWithExt = parts.at(-1); // e.g. toyota-123abc.jpg
-    const folderParts = parts.slice(parts.indexOf('upload') + 1, -1); // everything after /upload/ except filename
-    const fileName = fileWithExt?.split('.')[0]; // remove .jpg
-    const publicId = [...folderParts, fileName].join('/');
-    return publicId || null;
-  } catch {
+    const parts = new URL(url).pathname.split('/');
+    const versionIndex = parts.findIndex((part) => /^v\d+$/.test(part));
+    if (versionIndex === -1 || versionIndex === parts.length - 1) return null;
+
+    const publicIdWithExt = parts.slice(versionIndex + 1).join('/');
+    const lastDot = publicIdWithExt.lastIndexOf('.');
+    return lastDot === -1
+      ? decodeURIComponent(publicIdWithExt)
+      : decodeURIComponent(publicIdWithExt.slice(0, lastDot));
+  } catch (e) {
     return null;
   }
 }

@@ -146,8 +146,13 @@ export class ManageCarService {
     };
   }
 
-  async deleteAllCars(agencyId: string) {
+  async deleteAllCars(agencyId: string, agencyName: string) {
     const now = new Date();
+
+    const allCars = await this.prisma.car.findMany({
+      where: { agenceId: agencyId },
+      select: { id: true },
+    });
 
     const carsToDelete = await this.prisma.car.findMany({
       where: {
@@ -169,23 +174,20 @@ export class ManageCarService {
       return { message: 'No eligible cars found for deletion' };
     }
 
-    for (const car of carsToDelete) {
-      for (const imageUrl of car.carImages) {
-        const publicId = extractPublicIdFromUrl(imageUrl);
-        if (publicId) {
-          try {
-            await this.uploadImagesServices.deleteCarImages(publicId);
-          } catch (err) {
-            console.error(`Erreur suppression image ${publicId} :`, err);
-          }
-        }
+    const ids = carsToDelete.map((car) => car.id);
+    await this.prisma.car.deleteMany({ where: { id: { in: ids } } });
+
+    // Vérifier si TOUTES les voitures ont été supprimées
+    const shouldDeleteFolder = ids.length === allCars.length;
+
+    if (shouldDeleteFolder) {
+      await this.uploadImagesServices.deleteAllCarImagesOfAgency(agencyName);
+    } else {
+      // Supprimer seulement les images des voitures supprimées
+      for (const car of carsToDelete) {
+        await this.uploadImagesServices.deleteCarImagesByUrls(car.carImages);
       }
     }
-    await this.prisma.car.deleteMany({
-      where: {
-        id: { in: carsToDelete.map((car) => car.id) },
-      },
-    });
 
     return {
       message: `${carsToDelete.length} car(s) deleted successfully`,
@@ -193,47 +195,39 @@ export class ManageCarService {
   }
 
   async deleteCar(carId: string) {
-    const now = new Date();
+    try {
+      const now = new Date();
 
-    const car = await this.prisma.car.findFirst({
-      where: {
-        id: carId,
-        bookings: {
-          none: {
-            status: { in: ['ACTIVE', 'PENDING'] },
-            endDate: { gte: now },
+      const car = await this.prisma.car.findFirst({
+        where: {
+          id: carId,
+          bookings: {
+            none: {
+              status: { in: ['ACTIVE', 'PENDING'] },
+              endDate: { gte: now },
+            },
           },
         },
-      },
-      select: {
-        id: true,
-        carImages: true,
-      },
-    });
+        select: {
+          id: true,
+          carImages: true,
+        },
+      });
 
-    if (!car) {
-      throw new BadRequestException(
-        "Car has active or future bookings or doesn't exist",
-      );
-    }
-
-    // 2. Supprimer les images de Cloudinary
-    for (const imageUrl of car.carImages) {
-      const publicId = extractPublicIdFromUrl(imageUrl);
-      if (publicId) {
-        try {
-          await this.uploadImagesServices.deleteCarImages(publicId);
-        } catch (err) {
-          console.error(`Erreur suppression image ${publicId} :`, err);
-        }
+      if (!car) {
+        throw new BadRequestException(
+          "Car has active or future bookings or doesn't exist",
+        );
       }
+      await this.uploadImagesServices.deleteCarImagesByUrls(car?.carImages);
+      // 3. Supprimer la voiture en base
+      await this.prisma.car.delete({
+        where: { id: carId },
+      });
+
+      return { message: 'Car and associated images deleted successfully' };
+    } catch (err) {
+      console.error(`Erreur :`, err);
     }
-
-    // 3. Supprimer la voiture en base
-    await this.prisma.car.delete({
-      where: { id: carId },
-    });
-
-    return { message: 'Car and associated images deleted successfully' };
   }
 }

@@ -97,7 +97,10 @@ export class ManageCarsController {
   }
 
   @Delete(CARS_MODULES_APIS_URL.CARS_MANAGEMENT.DELETE_ALL_CARS)
-  async deleteAllCars(@Query('agencyId') agencyId: string) {
-    return this.carService.deleteAllCars(agencyId);
+  async deleteAllCars(
+    @Query('agencyId') agencyId: string,
+    @Query('agencyName') agencyName: string,
+  ) {
+    return this.carService.deleteAllCars(agencyId, agencyName);
   }
 }

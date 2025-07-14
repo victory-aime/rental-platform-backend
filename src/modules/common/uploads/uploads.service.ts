@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { extractPublicIdFromUrl } from '_config/utils/extract-public-id';
 
 @Injectable()
 export class UploadsService {
@@ -13,13 +14,26 @@ export class UploadsService {
     return this.cloudinary.uploadImage(file.buffer, filename, folderPath);
   }
 
-  async deleteCarImages(public_id: string) {
-    try {
-      await this.cloudinary.deleteFolder(`cars/${public_id}`);
-    } catch (error) {
-      console.error(`Erreur suppression images voiture ${public_id} :`, error);
-      throw error;
+  async deleteCarImagesByUrls(urls: string[]): Promise<void> {
+    for (const url of urls) {
+      const publicId = extractPublicIdFromUrl(url);
+      if (publicId) {
+        try {
+          await this.cloudinary.deleteImage(publicId);
+        } catch (err) {
+          console.error(
+            `Erreur suppression image Cloudinary : ${publicId}`,
+            err,
+          );
+        }
+      }
     }
+  }
+
+  async deleteAllCarImagesOfAgency(agencyName: string): Promise<void> {
+    const safeAgencyName = agencyName.replace(/\s+/g, '-').toLowerCase();
+    const folderPath = `cars/${safeAgencyName}`;
+    await this.cloudinary.deleteFolder(folderPath);
   }
 
   async uploadUsersImage(file: Express.Multer.File, keycloakId: string) {

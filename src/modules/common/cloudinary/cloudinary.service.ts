@@ -45,10 +45,7 @@ export class CloudinaryService {
 
   async deleteFolder(folderPath: string): Promise<void> {
     try {
-      // Supprime tous les fichiers
       await cloudinary.api.delete_resources_by_prefix(folderPath);
-
-      // Supprime le dossier vide
       await cloudinary.api.delete_folder(folderPath);
     } catch (err) {
       console.error(
